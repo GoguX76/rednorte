@@ -1,25 +1,29 @@
-import { Context } from "hono";
 import { userRepository } from "../repositories/user_repository";
 
-export async function signUp(c: Context) {
-    try {
-        let body;
-        try {
-            body = await c.req.json();
-        } catch {
-            return c.json({ success: false, message: "Invalid JSON format." }, 400);
-        }
+interface SignUpParams {
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  password?: string;
+}
 
-        const { first_name, last_name, email, password } = body;
+export async function signUpUser(data: SignUpParams) {
+    const { first_name, last_name, email, password } = data;
 
-        if (!first_name || !email || !password ) return c.json({ success: false, message: "Missing required fields." }, 400);
-
-        const userRepo = await userRepository();
-
-        const data = await userRepo?.signUp({ first_name, last_name, email, password });
-
-        return c.json(data)
-    } catch (error) {
-        return c.json({ success: false, message: "ocurrio un error en el servicio", err: error }, 500);
+    // Lógica de validación de negocio
+    if (!first_name || !email || !password) {
+        // Lanzamos un error puro
+        throw new Error("Missing required fields."); 
     }
+
+    // Llamada al repositorio
+    const userRepo = await userRepository();
+    if (!userRepo) {
+        throw new Error("Error de conexión con el repositorio.");
+    }
+
+    const result = await userRepo.signUp({ first_name, last_name, email, password });
+    
+    // Retornamos la data pura
+    return result; 
 }
