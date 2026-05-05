@@ -3,7 +3,7 @@ import { signUpUser } from '../services/user_service';
 
 export const userController = new Hono();
 
-// Extraemos la lógica a una función exportable
+// --- Handler de Registro (Tu código original) ---
 export const signUpHandler = async (c: Context) => {
     try {
         let body;
@@ -24,5 +24,24 @@ export const signUpHandler = async (c: Context) => {
     }
 };
 
-// El enrutador queda completamente limpio
+// --- NUEVO: Handler de Inicio de Sesión ---
+export const loginHandler = async (c: Context) => {
+    try {
+        const body = await c.req.json();
+        const { username, password } = body;
+
+        // Validación directa con el usuario por defecto
+        // (Más adelante puedes conectarlo a tu SQLite / user_service)
+        if (username === 'admin' && password === '1234') {
+            return c.json({ success: true, username: 'admin' }, 200);
+        } else {
+            return c.json({ success: false, message: 'Credenciales inválidas' }, 401);
+        }
+    } catch (error) {
+        return c.json({ success: false, message: 'Error interno en el servidor' }, 500);
+    }
+};
+
+// --- Enrutador ---
 userController.post('/signup', signUpHandler);
+userController.post('/login', loginHandler); // <- ¡Aquí está la puerta que faltaba!
