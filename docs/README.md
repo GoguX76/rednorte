@@ -31,36 +31,41 @@ Debes levantar ambos servidores en terminales separadas para que la plataforma f
 
 ### 1. Levantar el Microservicio de Usuarios (`ms-users`)
 Abre tu terminal en la raíz del proyecto y ejecuta los siguientes comandos:
-\`\`\`bash
+
 # Ingresar al directorio del microservicio
+```bash
 cd ms-users
-
+```
 # Instalar las dependencias
+```bash
 bun install
-
+```
 # Inicializar la base de datos (Genera local.db y el esquema de tablas)
+```bash
 bun run db_setup.ts
-
+```
 # (Opcional) Ejecutar las pruebas unitarias y de integración
+```bash
 bun test
-
+```
 # Iniciar el servidor en modo desarrollo (Puerto 3000)
+```bash
 bun run dev
-\`\`\`
-
+```
 ### 2. Levantar el Frontend (Puerto 4321)
 Abre una **nueva** terminal en la raíz del proyecto y ejecuta:
-\`\`\`bash
+```bash
 # Ingresar al directorio del frontend
 cd frontend
-
+```
 # Instalar las dependencias
+```bash
 bun install
-
+```
 # Iniciar el servidor en modo desarrollo
+```bash
 bun run dev
-\`\`\`
-
+```
 ## 🔑 Credenciales de Acceso (Desarrollo)
 Una vez que ambos servidores estén corriendo, ingresa a `http://localhost:4321` en tu navegador.
 
