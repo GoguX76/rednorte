@@ -44,4 +44,4 @@ export const loginHandler = async (c: Context) => {
 
 // --- Enrutador ---
 userController.post('/signup', signUpHandler);
-userController.post('/login', loginHandler); // <- ¡Aquí está la puerta que faltaba!
+userController.post('/login', loginHandler);
