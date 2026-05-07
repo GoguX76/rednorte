@@ -1,4 +1,4 @@
-// Importación de Hono para manejar peticiones HTTP
+// Importación de Hono para manejar peticiones HTTP y de AuthClient para manejar reglas de negocio
 import type { Context } from "hono";
 import { AuthClient } from "../services/auth_client";
 
