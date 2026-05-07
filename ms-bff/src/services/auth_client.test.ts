@@ -1,4 +1,4 @@
-import { describe,expect, it, spyOn } from "bun:test";
+import { describe, expect, it, spyOn } from "bun:test";
 import { AuthClient } from "../services/auth_client";
 
 // Reporte de pruebas AuthClient con describe
@@ -18,10 +18,10 @@ describe("AuthClient Service (BFF)", () => {
 
     it("De ser un login exitoso, debe devolver un JSON con los datos del usuario", async () => {
         // Simulamos que el microservicios de usuario responde correctamente
-        const respuestaSimulada = { token: "jwt-12346", id_usuario: 1};
+        const falseResponse = { token: "jwt-12346", id_usuario: 1};
         // Volvemos a secuestrar el fetch pero para dar un resultado éxitoso
         const mockFetch = spyOn(globalThis, "fetch").mockResolvedValue(
-            new Response(JSON.stringify(respuestaSimulada), {
+            new Response(JSON.stringify(falseResponse), {
                 status: 200, // Devuelve status 200 (éxitoso)
                 headers: { "Content-Type": "application/json" } // Indica que el contenido es un JSON
             })
@@ -29,7 +29,7 @@ describe("AuthClient Service (BFF)", () => {
 
         // Variable que contiene los datos del usuario para su testeo
         const resultado = await AuthClient.login("medico_rednorte", "medico12345");
-        expect(resultado).toEqual(respuestaSimulada); // Verifica que el service devolvió el JSON
+        expect(resultado).toEqual(falseResponse); // Verifica que el service devolvió el JSON
 
         // Aquí verifica que los datos si se estén enviando al microservicio correcto
         expect(mockFetch).toHaveBeenCalledWith('http://localhost:8081/api/auth/users', {
