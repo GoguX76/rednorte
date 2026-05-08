@@ -19,6 +19,6 @@ export const loginHandler = async (c: Context) => {
 
     } catch (error) {
         // Si la petición falla o las credenciales son inválidas se maneja el error aquí
-        return c.json({error: error instanceof Error ? error.message: "Error interno desconocido"}, 400)
+        return c.json({error: error instanceof Error ? error.message: "Error interno desconocido"}, 401)
     }
 };
