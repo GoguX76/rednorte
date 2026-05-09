@@ -16,7 +16,7 @@ app.use(
 );
 
 // 3. Montamos las rutas usando tu controlador
-app.route("/api/users", userController);
+app.route("/api/auth/users", userController);
 
 console.log("🚀 Microservicio RedNorte corriendo en puerto 3000");
 
