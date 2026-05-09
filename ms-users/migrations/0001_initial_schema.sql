@@ -23,6 +23,6 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 -- Inserción de los roles existentes en el sistema
-INSERT OR IGNORE INTO roles (id, key, description) VALUES ('rol_patient', 'patient', 'Paciente');
-INSERT OR IGNORE INTO roles (id, key, description) VALUES ('rol_doctor', 'doctor', 'Médico');
-INSERT OR IGNORE INTO roles (id, key, description) VALUES ('rol_admin', 'admin', 'Administrador');
+INSERT INTO roles (id, key, description) VALUES ('rol_patient', 'patient', 'Paciente') ON CONFLICT (id) DO NOTHING;
+INSERT INTO roles (id, key, description) VALUES ('rol_doctor', 'doctor', 'Médico') ON CONFLICT (id) DO NOTHING;
+INSERT INTO roles (id, key, description) VALUES ('rol_admin', 'admin', 'Administrador') ON CONFLICT (id) DO NOTHING;
