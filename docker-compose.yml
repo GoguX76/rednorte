@@ -1,19 +1,35 @@
-version: '3.8'
-
 services:
+  # Base de datos de los usuarios
+  db-users:
+    image: postgres:16-alpine
+    container_name: postgres-users
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: users_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_users:/var/lib/postgresql/data
+
+  # Backend de los usuarios
   ms-users:
     image: oven/bun:latest
     container_name: rednorte-ms-users
     working_dir: /app/ms-users
+    depends_on:
+      - db-users # Docker esperará a que la BD exista antes de levantar el backend
     volumes:
-      # Sincroniza tu código local con el contenedor en tiempo real
       - ./ms-users:/app/ms-users
     ports:
-      - "3000:3000" # Ajusta el "3000" si tu index.ts usa otro puerto
-    command: sh -c "bun install && bun run --watch index.ts"
+      - "3000:3000"
+    command: sh -c "bun install && bun run --watch src/index.ts"
     environment:
       - NODE_ENV=development
+      - DATABASE_URL=postgres://root:rootpassword@db-users:5432/users_db
 
+  # Frontend
   frontend:
     image: oven/bun:latest
     container_name: rednorte-frontend
@@ -21,7 +37,10 @@ services:
     volumes:
       - ./frontend:/app/frontend
     ports:
-      - "4321:4321" # Puerto por defecto de Astro
+      - "4321:4321"
     command: sh -c "bun install && bun run dev --host"
     environment:
       - NODE_ENV=development
+
+volumes:
+  pgdata_users:
