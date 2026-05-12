@@ -7,7 +7,7 @@ export class WaitlistRepository {
   async addToWaitlist(entry: WaitlistEntry) {
     const result = await sql`
       INSERT INTO waitlist_entries (user_id, priority, status, reason)
-      VALUES (${ /* inyecta el userId */ }, ${ /* inyecta la prioridad */ }, ${ /* inyecta el estado */ }, ${ /* inyecta el motivo */ })
+      VALUES (${entry.userId}, ${entry.priority}, ${entry.status}, ${entry.reason})
       RETURNING *;
     `;
     return result[0];
@@ -27,8 +27,8 @@ export class WaitlistRepository {
   async updateStatus(id: number, newStatus: string) {
     const result = await sql`
       UPDATE waitlist_entries
-      SET status = ${ /* inyecta el nuevo estado */ }
-      WHERE id = ${ /* inyecta el id del paciente */ }
+      SET status = ${newStatus}
+      WHERE id = ${id}
       RETURNING *;
     `;
     return result[0];

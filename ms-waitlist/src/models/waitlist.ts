@@ -1,5 +1,5 @@
-// Creamos Type para definir los distintos estados en la lista de espera y evitar errores de tipeo
-export type WaitlistStatus = "waiting" | "attending" | "finished" | "cancelled";
+export const VALID_STATUSES = ["waiting", "attending", "finished", "cancelled"] as const;
+export type WaitlistStatus = typeof VALID_STATUSES[number];
 
 export interface WaitlistEntry {
   id?: number; // Como Postgres crea un ID nuevo, lo ponemos como opcional aquó
