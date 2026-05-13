@@ -1,0 +1,54 @@
+import { WaitlistService } from "../services/waitlist_service";
+import { Hono, Context } from "hono";
+
+export const waitlistController = new Hono(); // Variable que permitará manejar los métodos CRUD y HTTP
+
+const service = new WaitlistService(); // Variable que importa los métodos del servicio de waitlist
+
+// Función que permite añadir a un paciente a la lista de espera
+export const addPatientHandler = async (c: Context) => {
+  try {
+    const body = await c.req.json(); // Recibe los datos que envía el usuario
+    const { userId, priority, reason } = body; // Saca los datos que necesitamos del body
+
+    // Añade un nuevo paciente a la lista de espera con los datos obtenidos anteriormente
+    const newPatient = await service.addPatientToWaitlist(
+      userId,
+      priority,
+      reason,
+    );
+    return c.json({ success: true, data: newPatient }, 201); // Retorna éxito si los datos son correctos
+  } catch (error: any) {
+    return c.json({ success: false, message: error.message }, 400); // Retorna un error si los datos son inválidos
+  }
+};
+
+// Función que permite mostrarnos los pacientes en la lista de espera
+export const getQueueHandler = async (c: Context) => {
+  try {
+    const queue = await service.getQueue(); // Usamos la función del service para obtener a los pacientes en la lista de espera
+    return c.json({ success: true, data: queue }, 200); // Devuelve la lista con los pacientes en caso de éxito
+  } catch (error: any) {
+    return c.json({ success: false, message: error.message }, 500); // Devuelve un error si hubo un problema con el servidor
+  }
+};
+
+// Función que permite actualizar el estado de un paciente en la lista de espera
+export const updateStatusHandler = async (c: Context) => {
+  try {
+    const id = Number(c.req.param("id")); // Toma el id del paciente
+    const body = await c.req.json(); // Recibe los datos que envía el usuario
+    const { newStatus } = body; // Saca el dato que necesitamos del body
+
+    const updateStatus = await service.updateStatus(id, newStatus); // Actualiza el estado del paciente con los nuevos parametros
+
+    return c.json({ success: true, data: updateStatus }, 200); // Devuelve éxito si los datos son correctos
+  } catch (error: any) {
+    return c.json({ success: false, message: error.message }, 400); // Devuelve error si los datos son inválidos
+  }
+};
+
+// Rutas para manejar las peticiones con las funciones
+waitlistController.post("/", addPatientHandler);
+waitlistController.get("/", getQueueHandler);
+waitlistController.patch("/:id", updateStatusHandler);
