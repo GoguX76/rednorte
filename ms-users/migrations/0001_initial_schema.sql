@@ -12,11 +12,11 @@ CREATE TABLE IF NOT EXISTS users (
     first_name TEXT NOT NULL,
     last_name TEXT,
     is_verified BOOLEAN DEFAULT FALSE,
-    email TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL TRUE,
     password TEXT NOT NULL,
     role_id TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
 );
 
 -- Creación índice para mejor rendimiento en la DB

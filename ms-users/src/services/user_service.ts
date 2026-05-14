@@ -22,8 +22,8 @@ export async function signUpUser(data: SignUpParams) {
         throw new Error("Error de conexión con el repositorio.");
     }
 
-    const result = await userRepo.signUp({ first_name, last_name, email, password });
+    const userData = await userRepo.signUp({ first_name, last_name, email, password });
     
     // Retornamos la data pura
-    return result; 
+    return userData; 
 }

@@ -1,15 +1,6 @@
-import { createClient } from "@libsql/client";
+import { sql } from "../db/connection";
+import type { UserEntry } from "../models/user";
 import { v4 as uuidv4 } from "uuid";
-
-const client = createClient({ url: "file:local.db" });
-
-// Interfaz para definir la entrada de datos puros
-interface SignUpData {
-    first_name: string;
-    last_name?: string;
-    email: string;
-    password: string;
-}
 
 export async function userRepository() {
     return {
