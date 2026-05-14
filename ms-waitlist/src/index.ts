@@ -1,9 +1,9 @@
 import { Hono } from "hono";
-import { waitlistController } from "./controllers/waitlist_controller";
+import waitlistRouter from "./routes/waitlist_routes";
 
 const app = new Hono(); // Variable que permitará manejar los métodos CRUD y HTTP
 
-app.route("/waitlist", waitlistController); // Definición del prefijo que maneja la lista de espera
+app.route("/waitlist", waitlistRouter); // Definición del prefijo que maneja la lista de espera
 
 app.get("/health", (c) => {
   return c.json({ status: "ok", service: "ms-waitlist" });

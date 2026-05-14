@@ -70,6 +70,19 @@ services:
       - NODE_ENV=development
       - DATABASE_URL=postgres://root:rootpassword@db-waitlist:5432/waitlist_db
 
+  bff:
+    image: oven/bun:latest
+    container_name: rednorte-bff
+    working_dir: /app
+    volumes:
+      - ./bff:/app
+    command: sh -c "bun install && bun run dev"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ms-users
+      - ms-waitlist
+
 volumes:
   pgdata_users:
   pgdata_waitlist:

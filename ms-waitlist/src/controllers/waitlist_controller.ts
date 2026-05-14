@@ -1,8 +1,6 @@
 import { WaitlistService } from "../services/waitlist_service";
 import { Hono, Context } from "hono";
 
-export const waitlistController = new Hono(); // Variable que permitará manejar los métodos CRUD y HTTP
-
 const service = new WaitlistService(); // Variable que importa los métodos del servicio de waitlist
 
 // Función que permite añadir a un paciente a la lista de espera
@@ -47,8 +45,3 @@ export const updateStatusHandler = async (c: Context) => {
     return c.json({ success: false, message: error.message }, 400); // Devuelve error si los datos son inválidos
   }
 };
-
-// Rutas para manejar las peticiones con las funciones
-waitlistController.post("/", addPatientHandler);
-waitlistController.get("/", getQueueHandler);
-waitlistController.patch("/:id", updateStatusHandler);
