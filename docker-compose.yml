@@ -42,5 +42,47 @@ services:
     environment:
       - NODE_ENV=development
 
+  db-waitlist:
+    image: postgres:16-alpine
+    container_name: postgres-waitlist
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: waitlist_db
+    ports:
+      - "5433:5432" # Mapeado al 5433 externo
+    volumes:
+      - pgdata_waitlist:/var/lib/postgresql/data
+
+  ms-waitlist:
+    image: oven/bun:latest
+    container_name: rednorte-ms-waitlist
+    working_dir: /app/ms-waitlist
+    depends_on:
+      - db-waitlist
+    volumes:
+      - ./ms-waitlist:/app/ms-waitlist
+    ports:
+      - "3001:3000" # Mapeado al 3001 externo
+    command: sh -c "bun install && bun run --watch src/index.ts"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://root:rootpassword@db-waitlist:5432/waitlist_db
+
+  bff:
+    image: oven/bun:latest
+    container_name: rednorte-bff
+    working_dir: /app
+    volumes:
+      - ./bff:/app
+    command: sh -c "bun install && bun run dev"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ms-users
+      - ms-waitlist
+
 volumes:
   pgdata_users:
+  pgdata_waitlist:

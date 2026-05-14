@@ -1,0 +1,19 @@
+{
+  "name": "ms-waitlist",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "hono": "^4.12.18",
+    "postgres": "^3.4.9"
+  },
+  "scripts": {
+    "migrate": "bun run src/db/migrate.ts"
+  }
+}
