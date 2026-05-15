@@ -1,37 +1,38 @@
-import { expect, test, describe, mock } from "bun:test";
+import { expect, test, describe, spyOn, afterAll } from "bun:test";
+import { userRepository } from "../repositories/user_repository";
 import { UserService } from "./user_service";
 
-// Simulamos el Objeto del Repositorio para aislar la base de datos
-mock.module("../repositories/user_repository", () => {
-  return {
-    userRepository: {
-      // Simula la búsqueda de correos existentes
-      findByEmail: mock(async (email: string) => {
-        if (email === "duplicado@rednorte.com") {
-          return { id: "1", email };
-        }
-        return null;
-      }),
-      // Simula la obtención de la ID del rol
-      findRoleIdByKey: mock(async (key: string) => {
-        if (key === "patient") return "rol_patient";
-        return null;
-      }),
-      // Simula la creación del usuario en la tabla
-      createUser: mock(async (id: string, data: any, roleId: string) => {
-        return { id, first_name: data.first_name, email: data.email };
-      }),
-      // Simula la extracción de credenciales para el Login
-      getUserCredentials: mock(async (email: string) => {
-        if (email === "existe@rednorte.com") {
-          // Devolvemos una contraseña hasheada real con Bun que equivalga a "123456"
-          const hashedPassword = await Bun.password.hash("123456");
-          return { id: "uuid-123", email, password: hashedPassword, role_id: "rol_patient" };
-        }
-        return null;
-      })
-    }
-  };
+// Espiamos y aislamos el repositorio
+const spyFindByEmail = spyOn(userRepository, "findByEmail").mockImplementation(async (email: string) => {
+  if (email === "duplicado@rednorte.com") {
+    return { id: "1", first_name: "Clon", last_name: "Test", email, password: "123", role_id: "rol_patient" };
+  }
+  return null;
+});
+
+const spyFindRoleIdByKey = spyOn(userRepository, "findRoleIdByKey").mockImplementation(async (key: string) => {
+  if (key === "patient") return "rol_patient";
+  return null;
+});
+
+const spyCreateUser = spyOn(userRepository, "createUser").mockImplementation(async (id: string, data: any, roleId: string) => {
+  return { id, first_name: data.first_name, email: data.email };
+});
+
+const spyGetCredentials = spyOn(userRepository, "getUserCredentials").mockImplementation(async (email: string) => {
+  if (email === "existe@rednorte.com") {
+    const hashedPassword = await Bun.password.hash("123456");
+    return { id: "uuid-123", email, password: hashedPassword, role_id: "rol_patient" };
+  }
+  return null;
+});
+
+// Limpieza absoluta al terminar el archivo
+afterAll(() => {
+  spyFindByEmail.mockRestore();
+  spyFindRoleIdByKey.mockRestore();
+  spyCreateUser.mockRestore();
+  spyGetCredentials.mockRestore();
 });
 
 describe("User Service - Pruebas de Lógica de Negocio", () => {

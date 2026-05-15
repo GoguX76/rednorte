@@ -1,41 +1,34 @@
-import { expect, test, describe, mock } from "bun:test";
-import { registerUserHandler, loginUserHandler, findUsersHandler } from "./user_controller";
+import { expect, test, describe, spyOn, afterAll } from "bun:test";
+import { UserService } from "../services/user_service";
+import { registerUserHandler, loginUserHandler } from "./user_controller";
 
-// Simulamos el Service: Le decimos cómo reaccionar sin ejecutar su lógica real
-mock.module("../services/user_service", () => {
-  return {
-    UserService: class {
-      // Simulamos la lógica de negocio del registro
-      async registerUser(data: any) {
-        if (!data.first_name || !data.email || !data.password) {
-          throw new Error("Los campos obligatorios se encuentran vacíos");
-        }
-        return { id: "uuid-falso-123", first_name: data.first_name, email: data.email };
-      }
+// Guardamos los espías en constantes para poder destruirlos al final
+const spyRegister = spyOn(UserService.prototype, "registerUser").mockImplementation(async (data: any) => {
+  if (!data.first_name || !data.email || !data.password) {
+    throw new Error("Los campos obligatorios se encuentran vacíos");
+  }
+  return { id: "uuid-falso-123", first_name: data.first_name, email: data.email };
+});
 
-      // Simulamos la lógica de negocio del inicio de sesión
-      async loginUser(data: any) {
-        if (!data.email || !data.password) {
-          throw new Error("Faltan credenciales");
-        }
-        if (data.email === "invalido@rednorte.com") {
-          throw new Error("Credenciales inválidas");
-        }
-        return { id: "uuid-falso-123", email: data.email, role_id: "rol_patient" };
-      }
+const spyLogin = spyOn(UserService.prototype, "loginUser").mockImplementation(async (data: any) => {
+  if (!data.email || !data.password) {
+    throw new Error("Faltan credenciales");
+  }
+  if (data.email === "invalido@rednorte.com") {
+    throw new Error("Credenciales inválidas");
+  }
+  return { id: "uuid-falso-123", email: data.email, role_id: "rol_patient" };
+});
 
-      // Simulamos la entrega de todos los usuarios
-      async findUsers() {
-        return [{ id: "1", first_name: "Alan", email: "alan@rednorte.com" }];
-      }
-    }
-  };
+// Destruimos los mocks para que no contaminen a los otros archivos de prueba
+afterAll(() => {
+  spyRegister.mockRestore();
+  spyLogin.mockRestore();
 });
 
 describe("User Controller - Pruebas de Handlers HTTP", () => {
   
   test("Debería devolver HTTP 201 y éxito si el registro es válido", async () => {
-    // Simulamos el Context de Hono con datos correctos
     const mockContext = {
       req: { 
         json: async () => ({ first_name: "Alan", email: "alan@rednorte.com", password: "123" }) 
@@ -51,7 +44,6 @@ describe("User Controller - Pruebas de Handlers HTTP", () => {
   });
 
   test("Debería devolver HTTP 400 si el registro viene incompleto", async () => {
-    // Simulamos el Context de Hono con datos faltantes
     const mockContext = {
       req: { 
         json: async () => ({ email: "alan@rednorte.com" }) 
@@ -67,7 +59,6 @@ describe("User Controller - Pruebas de Handlers HTTP", () => {
   });
 
   test("Debería devolver HTTP 200 y el token si las credenciales de login son válidas", async () => {
-    // Simulamos el Context de Hono con credenciales correctas
     const mockContext = {
       req: {
         json: async () => ({ email: "alan@rednorte.com", password: "123" })
@@ -83,7 +74,6 @@ describe("User Controller - Pruebas de Handlers HTTP", () => {
   });
 
   test("Debería devolver HTTP 401 si el login es rechazado por el servicio", async () => {
-    // Simulamos el Context de Hono con un correo que sabemos que fallará
     const mockContext = {
       req: {
         json: async () => ({ email: "invalido@rednorte.com", password: "123" })
