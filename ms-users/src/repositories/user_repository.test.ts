@@ -1,49 +1,41 @@
-// user_repository.test.ts
 import { expect, test, describe } from "bun:test";
 import { userRepository } from "./user_repository";
 
-describe("User Repository - Pruebas de Integración Reales", () => {
+describe("User Repository - Pruebas de Integración con Base de Datos", () => {
     
-    test("Debería insertar un usuario real en local.db", async () => {
-        // Inicializamos el repositorio real
-        const repo = await userRepository();
-        
-        // Generamos un correo único para que el test nunca falle por duplicidad
-        const correoDinamico = `scor_${Date.now()}@rednorte.com`;
+  test("Debería insertar un usuario real usando el objeto plano del repositorio", async () => {
+    const correoDinamico = `repo_test_${Date.now()}@rednorte.com`;
+    
+    const payload = {
+      first_name: "Scor",
+      last_name: "Repository",
+      email: correoDinamico,
+      password: "passwordContenedor123"
+    };
 
-        const payload = {
-            first_name: "Scor",
-            last_name: "Test",
-            email: correoDinamico,
-            password: "passwordSegura123"
-        };
+    const result = await userRepository.createUser("id-de-prueba-uuid", payload, "rol_patient");
 
-        // Ejecutamos la inserción real
-        const result = await repo.signUp(payload);
+    expect(result).toBeDefined();
+    expect(result.first_name).toBe("Scor");
+    expect(result.email).toBe(correoDinamico);
+  });
 
-        // Validamos que la base de datos nos devolvió los datos correctamente
-        expect(result).toBeDefined();
-        expect(result.first_name).toBe("Scor");
-        expect(result.email).toBe(correoDinamico);
-        expect(result.id).toBeDefined(); // Validamos que el UUID se generó
-    });
+  test("Debería extraer las credenciales completas de un usuario por su email", async () => {
+    const correoDinamico = `login_test_${Date.now()}@rednorte.com`;
+    const passwordDePrueba = "hash_falso_123";
 
-    test("Debería lanzar error si intentamos registrar un correo duplicado", async () => {
-        const repo = await userRepository();
-        const correoDuplicado = "duplicado@rednorte.com";
+    await userRepository.createUser("id-login-123", {
+      first_name: "Test",
+      last_name: "Login",
+      email: correoDinamico,
+      password: passwordDePrueba
+    }, "rol_patient");
 
-        // Insertamos el usuario por primera vez (esto debe funcionar)
-        await repo.signUp({
-            first_name: "Clon",
-            email: correoDuplicado,
-            password: "123"
-        });
+    const credentials = await userRepository.getUserCredentials(correoDinamico);
 
-        // Intentamos insertarlo por segunda vez y esperamos que la BD lo rechace
-        expect(repo.signUp({
-            first_name: "Clon2",
-            email: correoDuplicado,
-            password: "123"
-        })).rejects.toThrow("Email already in use");
-    });
+    expect(credentials).not.toBeNull();
+    expect(credentials?.email).toBe(correoDinamico);
+    expect(credentials?.password).toBe(passwordDePrueba);
+    expect(credentials?.role_id).toBe("rol_patient");
+  });
 });

@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT NOT NULL,
     role_id TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
+    FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
 );
 
 -- Creación índice para mejor rendimiento en la DB
