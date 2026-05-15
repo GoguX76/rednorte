@@ -38,5 +38,15 @@ export const userRepository = {
         const result = await sql`SELECT id, first_name, last_name, email, role_id FROM users WHERE id = ${id}`
 
         return result.length > 0 ? result[0] : null;
+    },
+
+    // Función que obtiene las credenciales del usuario
+    async getUserCredentials(email: string) {
+        const result = await sql`
+            SELECT id, email, password, role_id 
+            FROM users 
+            WHERE email = ${email}
+        `;
+        return result.length > 0 ? result[0] : null;
     }
 }

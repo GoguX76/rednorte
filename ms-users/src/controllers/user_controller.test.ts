@@ -1,59 +1,100 @@
-// user_controller.test.ts
 import { expect, test, describe, mock } from "bun:test";
-import { signUpHandler } from "./user_controller";
+import { registerUserHandler, loginUserHandler, findUsersHandler } from "./user_controller";
 
-// 1. Simulamos el Service: Le decimos cómo reaccionar sin ejecutar su lógica real
-mock.module("../services/user_service", () => ({
-    signUpUser: mock(async (data: any) => {
-        // Simulamos la regla de negocio: si falta algo, explota
+// Simulamos el Service: Le decimos cómo reaccionar sin ejecutar su lógica real
+mock.module("../services/user_service", () => {
+  return {
+    UserService: class {
+      // Simulamos la lógica de negocio del registro
+      async registerUser(data: any) {
         if (!data.first_name || !data.email || !data.password) {
-            throw new Error("Missing required fields.");
+          throw new Error("Los campos obligatorios se encuentran vacíos");
         }
-        // Si todo está bien, simulamos la respuesta exitosa
-        return { id: 1, first_name: data.first_name, email: data.email };
-    })
-}));
+        return { id: "uuid-falso-123", first_name: data.first_name, email: data.email };
+      }
 
-describe("User Controller - signUpHandler", () => {
-    
-    test("Debería devolver HTTP 201 y éxito si el JSON es válido", async () => {
-        // 2. Simulamos el Cajero: Creamos un falso Context de Hono
-        const mockContext = {
-            req: { 
-                json: async () => ({ 
-                    first_name: "Alan", 
-                    last_name: "Front", 
-                    email: "alan@rednorte.com", 
-                    password: "123" 
-                }) 
-            },
-            // Capturamos lo que el controlador intenta devolver
-            json: (data: any, status: number) => ({ body: data, status: status })
-        } as any;
+      // Simulamos la lógica de negocio del inicio de sesión
+      async loginUser(data: any) {
+        if (!data.email || !data.password) {
+          throw new Error("Faltan credenciales");
+        }
+        if (data.email === "invalido@rednorte.com") {
+          throw new Error("Credenciales inválidas");
+        }
+        return { id: "uuid-falso-123", email: data.email, role_id: "rol_patient" };
+      }
 
-        // Ejecutamos el Handler
-        const response = await signUpHandler(mockContext);
+      // Simulamos la entrega de todos los usuarios
+      async findUsers() {
+        return [{ id: "1", first_name: "Alan", email: "alan@rednorte.com" }];
+      }
+    }
+  };
+});
 
-        // Validamos que respondió correctamente
-        expect(response.status).toBe(201);
-        expect(response.body.success).toBe(true);
-        expect(response.body.data.first_name).toBe("Alan");
-    });
+describe("User Controller - Pruebas de Handlers HTTP", () => {
+  
+  test("Debería devolver HTTP 201 y éxito si el registro es válido", async () => {
+    // Simulamos el Context de Hono con datos correctos
+    const mockContext = {
+      req: { 
+        json: async () => ({ first_name: "Alan", email: "alan@rednorte.com", password: "123" }) 
+      },
+      json: (data: any, status: number) => ({ body: data, status: status })
+    } as any;
 
-    test("Debería devolver HTTP 400 si el Service rechaza los datos", async () => {
-        // Simulamos un JSON incompleto
-        const mockContext = {
-            req: { 
-                json: async () => ({ email: "alan@rednorte.com" }) // Falta el resto
-            },
-            json: (data: any, status: number) => ({ body: data, status: status })
-        } as any;
+    const response = await registerUserHandler(mockContext) as any;
 
-        const response = await signUpHandler(mockContext);
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.first_name).toBe("Alan");
+  });
 
-        // Validamos que el controlador tradujo el error del Service a un 400
-        expect(response.status).toBe(400);
-        expect(response.body.success).toBe(false);
-        expect(response.body.message).toBe("Missing required fields.");
-    });
+  test("Debería devolver HTTP 400 si el registro viene incompleto", async () => {
+    // Simulamos el Context de Hono con datos faltantes
+    const mockContext = {
+      req: { 
+        json: async () => ({ email: "alan@rednorte.com" }) 
+      },
+      json: (data: any, status: number) => ({ body: data, status: status })
+    } as any;
+
+    const response = await registerUserHandler(mockContext) as any;
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe("Los campos obligatorios se encuentran vacíos");
+  });
+
+  test("Debería devolver HTTP 200 y el token si las credenciales de login son válidas", async () => {
+    // Simulamos el Context de Hono con credenciales correctas
+    const mockContext = {
+      req: {
+        json: async () => ({ email: "alan@rednorte.com", password: "123" })
+      },
+      json: (data: any, status: number) => ({ body: data, status: status })
+    } as any;
+
+    const response = await loginUserHandler(mockContext) as any;
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.email).toBe("alan@rednorte.com");
+  });
+
+  test("Debería devolver HTTP 401 si el login es rechazado por el servicio", async () => {
+    // Simulamos el Context de Hono con un correo que sabemos que fallará
+    const mockContext = {
+      req: {
+        json: async () => ({ email: "invalido@rednorte.com", password: "123" })
+      },
+      json: (data: any, status: number) => ({ body: data, status: status })
+    } as any;
+
+    const response = await loginUserHandler(mockContext) as any;
+
+    expect(response.status).toBe(401);
+    expect(response.body.success).toBe(false);
+    expect(response.body.message).toBe("Credenciales inválidas");
+  });
 });

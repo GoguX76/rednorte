@@ -51,4 +51,34 @@ export class UserService {
         // Si el ID del usuario existe, retorna el resultado
         return user;
     }
+
+    async loginUser(userData: Pick<UserEntry, "email" | "password">) {
+        // Validamos que los campos tengan datos
+        if (!userData.email || !userData.password) {
+            throw new Error("Faltan credenciales")
+        }
+
+        // Obtiene el correo del usuario y lo guarda en una constante
+        const credentials = await userRepository.getUserCredentials(userData.email);
+
+        // Si el correo es inválido lanza error
+        if(!credentials) {
+            throw new Error("Credenciales inválidas")
+        }
+
+        // Comprueba si la contraseña normal y hasehada con iguales con Bun
+        const isPasswordValid = await Bun.password.verify(userData.password, credentials.password);
+
+        // Si la contraseña es inválida lanza error
+        if (!isPasswordValid) {
+            throw new Error("Credenciales inválidas")
+        }
+
+        // Retorna los datos necesarios
+        return {
+            id: credentials.id,
+            email: credentials.email,
+            role_id: credentials.role_id
+        };
+    }
 }

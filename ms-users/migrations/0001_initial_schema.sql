@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name TEXT NOT NULL,
     last_name TEXT,
     is_verified BOOLEAN DEFAULT FALSE,
-    email TEXT UNIQUE NOT NULL TRUE,
+    email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     role_id TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
