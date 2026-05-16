@@ -1,4 +1,4 @@
-import { Context } from "hono";
+import type { Context } from "hono";
 import { UserService } from "../services/user_service";
 
 const service = new UserService(); // Variable que importa las funciones del Service
