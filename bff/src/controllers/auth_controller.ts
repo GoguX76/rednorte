@@ -30,3 +30,37 @@ export const loginHandler = async (c: Context) => {
     );
   }
 };
+
+export const registerHandler = async (c: Context) => {
+  try {
+    const body = await c.req.json();
+    const newUser = await AuthClient.register(body);
+    return c.json(newUser, 201);
+  } catch (error) {
+    return c.json({ error: "No se pudo registrar" }, 400);
+  }
+};
+
+export const getAllUsersHandler = async (c: Context) => {
+  try {
+    const users = await AuthClient.findAllUsers();
+    return c.json({ success: true, data: users }, 200);
+  } catch (error: any) {
+    return c.json(
+      { success: false, message: "Error al obtener usuarios" },
+      500,
+    );
+  }
+};
+
+export const getUserByIdHandler = async (c: Context) => {
+  try {
+    const id = c.req.param("id");
+    if (!id) return c.json({ success: false, message: "ID obligatorio" }, 400);
+
+    const user = await AuthClient.findUserById(id);
+    return c.json({ success: true, data: user }, 200);
+  } catch (error: any) {
+    return c.json({ success: false, message: "Usuario no encontrado" }, 404);
+  }
+};

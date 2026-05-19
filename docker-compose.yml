@@ -1,9 +1,7 @@
 services:
-  # Base de datos de los usuarios
   db-users:
     image: postgres:16-alpine
     container_name: postgres-users
-    restart: unless-stopped
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: rootpassword
@@ -13,62 +11,43 @@ services:
     volumes:
       - pgdata_users:/var/lib/postgresql/data
 
-  # Backend de los usuarios
   ms-users:
     image: oven/bun:latest
     container_name: rednorte-ms-users
-    working_dir: /app/ms-users
-    depends_on:
-      - db-users # Docker esperará a que la BD exista antes de levantar el backend
+    working_dir: /app
     volumes:
-      - ./ms-users:/app/ms-users
+      - ./ms-users:/app
     ports:
-      - "3000:3000"
+      - "3001:3001"
     command: sh -c "bun install && bun run --watch src/index.ts"
     environment:
-      - NODE_ENV=development
       - DATABASE_URL=postgres://root:rootpassword@db-users:5432/users_db
-
-  # Frontend
-  frontend:
-    image: oven/bun:latest
-    container_name: rednorte-frontend
-    working_dir: /app/frontend
-    volumes:
-      - ./frontend:/app/frontend
-    ports:
-      - "4321:4321"
-    command: sh -c "bun install && bun run dev --host"
-    environment:
-      - NODE_ENV=development
+      - PORT=3001
 
   db-waitlist:
     image: postgres:16-alpine
     container_name: postgres-waitlist
-    restart: unless-stopped
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: rootpassword
       POSTGRES_DB: waitlist_db
     ports:
-      - "5433:5432" # Mapeado al 5433 externo
+      - "5433:5432"
     volumes:
       - pgdata_waitlist:/var/lib/postgresql/data
 
   ms-waitlist:
     image: oven/bun:latest
     container_name: rednorte-ms-waitlist
-    working_dir: /app/ms-waitlist
-    depends_on:
-      - db-waitlist
+    working_dir: /app
     volumes:
-      - ./ms-waitlist:/app/ms-waitlist
+      - ./ms-waitlist:/app
     ports:
-      - "3001:3000" # Mapeado al 3001 externo
+      - "3000:3000"
     command: sh -c "bun install && bun run --watch src/index.ts"
     environment:
-      - NODE_ENV=development
       - DATABASE_URL=postgres://root:rootpassword@db-waitlist:5432/waitlist_db
+      - PORT=3000
 
   bff:
     image: oven/bun:latest
@@ -79,6 +58,8 @@ services:
     command: sh -c "bun install && bun run dev"
     ports:
       - "8080:8080"
+    environment:
+      - JWT_SECRET=clave_secreta_desarrollo
     depends_on:
       - ms-users
       - ms-waitlist

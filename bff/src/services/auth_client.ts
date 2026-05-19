@@ -1,5 +1,6 @@
 // Variable que almacena la URL con la que se conecta con el BFF
 const AUTH_API_URL = "http://ms-users:3001/users/login";
+const REGISTER_API_URL = "http://ms-users:3001/users";
 
 // Objeto constante que contiene los métodos para la autenticación en el login
 export const AuthClient = {
@@ -19,6 +20,26 @@ export const AuthClient = {
     }
 
     // Devuelve los datos al controlador del BFF
+    return await response.json();
+  },
+  register: async (data: any) => {
+    const response = await fetch(REGISTER_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error("Error al registrar usuario");
+    return await response.json();
+  },
+
+  findAllUsers: async () => {
+    const response = await fetch("http://ms-users:3001/users");
+    return await response.json();
+  },
+
+  findUserById: async (id: string) => {
+    const response = await fetch(`http://ms-users:3001/users/${id}`);
+    if (!response.ok) throw new Error("Usuario no encontrado");
     return await response.json();
   },
 };

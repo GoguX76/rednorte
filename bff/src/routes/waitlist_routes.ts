@@ -12,7 +12,7 @@ const waitlistRouter = new Hono();
 const secretKey = (Bun.env.JWT_SECRET || "clave_secreta_desarrollo") as string;
 
 // Todo lo que pase por aquí debe tener un token válido
-waitlistRouter.use("/*", jwt({ secret: secretKey } as any));
+waitlistRouter.use("/*", jwt({ secret: secretKey, alg: "HS256" } as any));
 
 // Definimos las rutas para las diferentes funciones
 waitlistRouter.post("/", addPatientHandler);
