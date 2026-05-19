@@ -30,9 +30,15 @@ Sistema de microservicios para la gestión de pacientes y listas de espera en ce
 ## Cómo ejecutar el proyecto
 
 ### Prerrequisitos
-- [Docker](https://www.docker.com/get-started) y [Docker Compose](https://docs.docker.com/compose/install/) instalados
+- [Docker](https://www.docker.com/get-started), [Docker Compose](https://docs.docker.com/compose/install/ y [Bun](https://bun.com/docs/installation#windows) instalados
 
 ### Backend
+```bash
+# Desde la raiz del proyecto levantar base de datos de ms-users
+bun run ms-users/src/db/migrate.ts
+# Luego, levantar la base de datos de ms-waitlist
+bun run ms-waitlist/src/db/migrate.ts
+```
 ```bash
 # Desde la raíz del proyecto
 docker-compose up --build
