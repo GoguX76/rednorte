@@ -1,1 +1,8 @@
 node_modules/
+main
+./main
+
+dist/
+./dist
+*.db
+.env
