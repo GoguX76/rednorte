@@ -22,12 +22,6 @@ Sistema de microservicios para la gestión de pacientes y listas de espera en ce
 - **Base de datos**: PostgreSQL (via `postgres` — driver nativo para Bun)
 - **Migraciones**: SQL plano ejecutado con script `migrate.ts`
 
-### Frontend
-- **Framework**: [Astro](https://astro.build/)
-- **Componentes interactivos**: [Preact](https://preactjs.com/)
-- **Estado global**: [Nanostores](https://github.com/nanostores/nanostores) + `@nanostores/preact`
-- **Persistencia de sesión**: `localStorage`
-
 ### Infraestructura
 - **Orquestación**: Docker + Docker Compose
 - **Base de datos ms-users**: PostgreSQL en contenedor `db-users` (puerto `5432`)
