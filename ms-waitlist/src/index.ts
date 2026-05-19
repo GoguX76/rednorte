@@ -13,6 +13,6 @@ console.log("Waitlist corriendo en el puerto 3000");
 
 // Exportamos la app en el puerto 3000, Bun la levantará automáticamente
 export default {
-  port: 3000,
+  port: Bun.env.PORT || 3000,
   fetch: app.fetch,
 };

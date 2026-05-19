@@ -1,7 +1,7 @@
 import { sql } from "../db/connection";
 import type { WaitlistEntry } from "../models/waitlist";
 
-export class WaitlistRepository {
+export const waitlistRepository = {
 
   // Inserta un nuevo registro en la waitlist
   async addToWaitlist(entry: WaitlistEntry) {
@@ -11,7 +11,7 @@ export class WaitlistRepository {
       RETURNING *;
     `;
     return result[0];
-  }
+  },
 
   // Lee los registros que hay en la waitlist
   async getPendingPatients() {
@@ -21,7 +21,7 @@ export class WaitlistRepository {
       ORDER BY priority DESC, created_at ASC;
     `;
     return result;
-  }
+  },
 
   // Modificar un registro existente en la waitlist
   async updateStatus(id: number, newStatus: string) {

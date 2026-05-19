@@ -1,5 +1,5 @@
 import { WaitlistService } from "../services/waitlist_service";
-import { Hono, Context } from "hono";
+import type { Context } from "hono";
 
 const service = new WaitlistService(); // Variable que importa los métodos del servicio de waitlist
 
@@ -7,14 +7,10 @@ const service = new WaitlistService(); // Variable que importa los métodos del 
 export const addPatientHandler = async (c: Context) => {
   try {
     const body = await c.req.json(); // Recibe los datos que envía el usuario
-    const { userId, priority, reason } = body; // Saca los datos que necesitamos del body
 
     // Añade un nuevo paciente a la lista de espera con los datos obtenidos anteriormente
-    const newPatient = await service.addPatientToWaitlist(
-      userId,
-      priority,
-      reason,
-    );
+    const newPatient = await service.addPatientToWaitlist(body);
+
     return c.json({ success: true, data: newPatient }, 201); // Retorna éxito si los datos son correctos
   } catch (error: any) {
     return c.json({ success: false, message: error.message }, 400); // Retorna un error si los datos son inválidos
@@ -35,10 +31,13 @@ export const getQueueHandler = async (c: Context) => {
 export const updateStatusHandler = async (c: Context) => {
   try {
     const id = Number(c.req.param("id")); // Toma el id del paciente
-    const body = await c.req.json(); // Recibe los datos que envía el usuario
-    const { newStatus } = body; // Saca el dato que necesitamos del body
+    // Evaluamos si el ID es válido
+    if (Number.isNaN(id)) {
+      return c.json({success: false, message: "ID inválido"}, 400)
+    }
 
-    const updateStatus = await service.updateStatus(id, newStatus); // Actualiza el estado del paciente con los nuevos parametros
+    const body = await c.req.json(); // Recibe los datos que envía el usuario
+    const updateStatus = await service.updateStatus(id, body.newStatus); // Actualiza el estado del paciente con los nuevos parametros
 
     return c.json({ success: true, data: updateStatus }, 200); // Devuelve éxito si los datos son correctos
   } catch (error: any) {
