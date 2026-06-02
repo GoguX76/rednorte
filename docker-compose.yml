@@ -17,7 +17,8 @@ services:
       retries: 5
 
   ms-users:
-    image: oven/bun:latest
+    build:
+      context: ./ms-users
     container_name: rednorte-ms-users
     working_dir: /app
     volumes:
@@ -50,7 +51,8 @@ services:
       retries: 5
 
   ms-waitlist:
-    image: oven/bun:latest
+    build:
+      context: ./ms-waitlist
     container_name: rednorte-ms-waitlist
     working_dir: /app
     volumes:
@@ -67,7 +69,8 @@ services:
         condition: service_healthy
 
   bff:
-    image: oven/bun:latest
+    build:
+      context: ./bff
     container_name: rednorte-bff
     working_dir: /app
     volumes:
