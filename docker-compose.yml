@@ -10,6 +10,11 @@ services:
       - "5432:5432"
     volumes:
       - pgdata_users:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d users_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
 
   ms-users:
     image: oven/bun:latest
@@ -19,12 +24,13 @@ services:
       - ./ms-users:/app
     ports:
       - "3001:3001"
-    command: sh -c "bun install && bun run --watch src/index.ts"
+    command: sh -c "bun install && bun run src/db/migrate.ts && bun run --watch src/index.ts"
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-users:5432/users_db
       - PORT=3001
     depends_on:
-      - db-users
+      db-users:
+        condition: service_healthy
 
   db-waitlist:
     image: postgres:16-alpine
@@ -37,6 +43,11 @@ services:
       - "5433:5432"
     volumes:
       - pgdata_waitlist:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d waitlist_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
 
   ms-waitlist:
     image: oven/bun:latest
@@ -46,12 +57,14 @@ services:
       - ./ms-waitlist:/app
     ports:
       - "3000:3000"
-    command: sh -c "bun install && bun run --watch src/index.ts"
+    # Sintaxis corregida añadiendo el && faltante
+    command: sh -c "bun install && bun run src/db/migrate.ts && bun run --watch src/index.ts"
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-waitlist:5432/waitlist_db
       - PORT=3000
     depends_on:
-      - db-waitlist
+      db-waitlist:
+        condition: service_healthy
 
   bff:
     image: oven/bun:latest
@@ -65,8 +78,10 @@ services:
     environment:
       - JWT_SECRET=${JWT_SECRET}
     depends_on:
-      - ms-users
-      - ms-waitlist
+      ms-users:
+        condition: service_started
+      ms-waitlist:
+        condition: service_started
 
 volumes:
   pgdata_users:

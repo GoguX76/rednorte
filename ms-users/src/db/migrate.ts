@@ -1,10 +1,6 @@
-import postgres from "postgres";
+import { sql } from "./connection";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-
-// Conexión apuntando al contenedor Docker
-const DATABASE_URL = "postgres://root:rootpassword@localhost:5432/users_db";
-const sql = postgres(DATABASE_URL);
 
 async function runMigrations() {
   try {
