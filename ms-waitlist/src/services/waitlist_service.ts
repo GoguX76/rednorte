@@ -1,4 +1,5 @@
 import { waitlistRepository } from "../repositories/waitlist_repository";
+import { publishNotification } from "../rabbitmq/producer";
 import { type WaitlistEntry, type WaitlistStatus, VALID_STATUSES } from "../models/waitlist";
 
 export class WaitlistService {
@@ -47,6 +48,20 @@ export class WaitlistService {
         if (!updatedEntry) {
             throw new Error("Registro no encontrado en la lista de espera");
         }
+
+        // Paquete que envía la información para la notificación
+        const eventPayload = {
+            userId: updatedEntry.userId,
+            type: "WAITLIST_STATUS_CHANGED",
+            newStatus: newStatus,
+            message: `El estado de tu turno ha cambiado a: ${newStatus}`,
+            timestap: new Date().toISOString()
+        };
+
+        // En caso de que tenga un error, lanza un error pero continúa la ejecución del sistema
+        publishNotification(eventPayload).catch(err => {
+            console.error("[!] Hubo un error al enviar notificación a RabbitQM:", err)
+        })
         // Si todo salió bien, retornamos el resultado
         return updatedEntry;
     }

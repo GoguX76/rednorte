@@ -3,6 +3,7 @@ import amqp from 'amqplib';
 const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://root:root123@localhost:5672'; // Valor URL de RabbitMQ
 const QUEUE_NAME = 'notifications_queue'; // Nombre de la queue
 
+// Función que pública la notificación a RabbitMQ
 export const publishNotification = async (payload: any) => {
     try {
         const connection = await amqp.connect(RABBITMQ_URL); // Se conecta al URL de RabbitMQ
