@@ -54,6 +54,18 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  notifications-db:
+    image: postgres:15-alpine
+    container_name: notifications-postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_DB: notifications_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - notifications_data:/var/lib/postgresql/data
+
   bff:
     image: oven/bun:latest
     container_name: rednorte-bff
@@ -73,7 +85,7 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: rednorte-rabbitmq
     ports:
-      - "5672:5672"   
+      - "5672:5672"
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: root
@@ -87,3 +99,4 @@ services:
 volumes:
   pgdata_users:
   pgdata_waitlist:
+  notifications_data:
