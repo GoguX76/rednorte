@@ -59,7 +59,7 @@ export class WaitlistService {
 
     // Paquete que envía la información para la notificación
     const eventPayload = {
-      userId: updatedEntry.userId,
+      userId: updatedEntry.user_id,
       type: "WAITLIST_STATUS_CHANGED",
       newStatus: newStatus,
       message: `El estado de tu turno ha cambiado a: ${newStatus}`,
