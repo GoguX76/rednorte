@@ -55,16 +55,34 @@ services:
         condition: service_healthy
 
   notifications-db:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
     container_name: notifications-postgres
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: notifications_db
     ports:
       - "5434:5432"
     volumes:
       - notifications_data:/var/lib/postgresql/data
+
+  ms-notifications:
+    image: oven/bun:latest
+    container_name: rednorte-ms-notifications
+    working_dir: /app
+    volumes:
+      - ./ms-notifications:/app
+    ports:
+      - "3002:3002"
+    command: sh -c "bun install && bun run --watch src/index.ts"
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@notifications-db:5432/notifications_db
+      - PORT=3002
+      - RABBITMQ_URL=amqp://root:root123@rabbitmq:5672
+    depends_on:
+      - notifications-db
+      rabbitmq:
+        condition: service_healthy
 
   bff:
     image: oven/bun:latest
