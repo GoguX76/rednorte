@@ -1,16 +1,20 @@
 import { startConsumer } from "./rabbitmq/consumer";
 import { addConnection, removeConnection } from "./websocket/connectionManager";
 
-// Arrancamos el servicio de RabbitMQ
+const PORT = parseInt(Bun.env.PORT || "3002");
+
 console.log("[*] Inicializando servicios de ms-notifications");
 await startConsumer();
 
-// Arrancamos el servidor web y WebSockets
 const server = Bun.serve<{ userId: string }>({
-    port: 3002,
+    port: PORT,
 
     fetch(req, server) {
         const url = new URL(req.url);
+
+        if (url.pathname === "/health") {
+            return Response.json({ status: "ok", service: "ms-notifications" });
+        }
 
         if (url.pathname === "/ws") {
             const userId = url.searchParams.get("userId");
@@ -32,14 +36,14 @@ const server = Bun.serve<{ userId: string }>({
 
     websocket: {
         open(ws) {
-            console.log(`[WS] 🟢 Usuario conectado con ID: ${ws.data.userId}`);
+            console.log(`[WS] Usuario conectado con ID: ${ws.data.userId}`);
             addConnection(ws.data.userId, ws)
         },
         message(ws, message) {
-            console.log(`[WS] 📩 Mensaje ignorado del usuario ${ws.data.userId}`);
+            console.log(`[WS] Mensaje ignorado del usuario ${ws.data.userId}`);
         },
         close(ws, code, message) {
-            console.log(`[WS] 🔴 Usuario desconectado con ID: ${ws.data.userId}`);
+            console.log(`[WS] Usuario desconectado con ID: ${ws.data.userId}`);
             removeConnection(ws.data.userId)
         }
     }
