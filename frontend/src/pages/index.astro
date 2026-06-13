@@ -1,0 +1,50 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="RedNorte - Inicio">
+  <section class="text-center py-16">
+    <h1 class="text-4xl font-bold text-gray-800 mb-4">
+      Bienvenido a RedNorte
+    </h1>
+    <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+      Sistema de gestión de lista de espera médica. Administración eficiente de pacientes,
+      priorización automática y seguimiento en tiempo real.
+    </p>
+    <div class="flex gap-4 justify-center">
+      <a
+        href="/login"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+      >
+        Iniciar Sesión
+      </a>
+      <a
+        href="/waitlist"
+        class="bg-white hover:bg-gray-50 text-blue-600 border border-blue-600 px-6 py-3 rounded-lg font-medium transition-colors"
+      >
+        Ver Lista de Espera
+      </a>
+    </div>
+  </section>
+
+  <section class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto pb-16">
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">Priorización Inteligente</h2>
+      <p class="text-gray-600 text-sm">
+        Clasificación automática de pacientes por nivel de urgencia: Baja, Media, Alta y Urgencia.
+      </p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">Seguimiento en Tiempo Real</h2>
+      <p class="text-gray-600 text-sm">
+        Estados actualizados: En Espera, En Atención, Finalizado y Cancelado.
+      </p>
+    </div>
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">Acceso Seguro</h2>
+      <p class="text-gray-600 text-sm">
+        Autenticación JWT con roles de paciente, médico y administrador.
+      </p>
+    </div>
+  </section>
+</Layout>
