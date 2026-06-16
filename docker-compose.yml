@@ -57,6 +57,7 @@ services:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-waitlist:5432/waitlist_db
       - PORT=3000
       - JWT_SECRET=${JWT_SECRET}
+      - RABBITMQ_URL=amqp://root:root123@rabbitmq:5672
     depends_on:
       db-waitlist:
         condition: service_healthy
@@ -74,6 +75,11 @@ services:
       - "5434:5432"
     volumes:
       - notifications_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d notifications_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 5
 
   ms-notifications:
     build:
@@ -87,7 +93,7 @@ services:
       - RABBITMQ_URL=amqp://root:root123@rabbitmq:5672
     depends_on:
       notifications-db:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
 
@@ -108,7 +114,7 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: rednorte-rabbitmq
     ports:
-      - "5672:5672"
+      - "5500:5672"
       - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: root
