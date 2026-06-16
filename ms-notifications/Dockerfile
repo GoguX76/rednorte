@@ -11,4 +11,4 @@ COPY --from=base /app/node_modules ./node_modules
 COPY . .
 
 EXPOSE 3002
-CMD ["sh", "-c", "bun run src/index.ts"]
+CMD ["sh", "-c", "bun run src/db/migrate.ts && bun run src/index.ts"]
