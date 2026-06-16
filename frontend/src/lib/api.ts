@@ -12,6 +12,11 @@ type RequestOptions = Omit<RequestInit, 'headers'> & {
   headers?: Record<string, string>;
 };
 
+type ApiResponse<T> = {
+  success: boolean;
+  data: T;
+};
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
   const headers: Record<string, string> = {
@@ -22,15 +27,17 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     headers['Authorization'] = `Bearer ${token}`;
   }
   const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+  const body = await res.json().catch(() => ({ success: false, message: res.statusText }));
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ message: res.statusText }));
-    throw new ApiError(error.message || 'Error en la solicitud', res.status);
+    throw new ApiError(body.message || 'Error en la solicitud', res.status);
   }
-  return res.json() as Promise<T>;
+  return body.data as T;
 }
 
 export type UserResponse = {
   id: string;
+  first_name: string;
+  last_name?: string;
   email: string;
   role_id: string;
 };
@@ -56,7 +63,7 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       }),
-    register: (data: { first_name: string; email: string; password: string; last_name?: string }) =>
+    register: (data: { first_name: string; last_name?: string; email: string; password: string }) =>
       request<UserResponse>('/auth/users', { method: 'POST', body: JSON.stringify(data) }),
     getUsers: () => request<UserResponse[]>('/auth/users'),
     getUserById: (id: string) => request<UserResponse>(`/auth/users/${id}`),

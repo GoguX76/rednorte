@@ -23,6 +23,7 @@ export default function Header() {
         </a>
         <div class="flex gap-6 items-center">
           <a href="/" class="hover:text-blue-200 transition-colors">Inicio</a>
+          <a href="/users" class="hover:text-blue-200 transition-colors">Usuarios</a>
           <a href="/waitlist" class="hover:text-blue-200 transition-colors">Lista de Espera</a>
           {user ? (
             <div class="flex gap-4 items-center">

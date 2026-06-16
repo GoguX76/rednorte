@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro';
+import UsersList from '../components/UsersList';
+---
+
+<Layout title="RedNorte - Usuarios">
+  <section>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800">Usuarios Registrados</h1>
+    </div>
+    <UsersList client:load />
+  </section>
+</Layout>
+
+<script>
+  if (!localStorage.getItem('token')) {
+    window.location.href = '/login';
+  }
+</script>
