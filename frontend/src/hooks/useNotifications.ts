@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'preact/hooks';
 import { addNotification, type Notification } from '../stores/notifications';
 
-const WS_URL = 'ws://localhost:3002/ws';
+const WS_URL = import.meta.env.PUBLIC_WS_URL || 'ws://localhost:3002/ws';
 
 function playDropSound() {
   try {
