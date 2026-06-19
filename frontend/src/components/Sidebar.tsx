@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'preact/hooks';
 import { useStore } from '@nanostores/preact';
 import { $user, logout, initAuth } from '../stores/auth';
+import NotificationBell from './NotificationBell';
+import { useNotifications } from '../hooks/useNotifications';
 
 const NAV_ITEMS = [
   { href: '/', label: 'Inicio', icon: '🏠' },
@@ -11,6 +13,8 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const user = useStore($user);
   const [isOpen, setIsOpen] = useState(false);
+
+  useNotifications(user?.id ?? null);
 
   useEffect(() => {
     initAuth();
@@ -56,15 +60,18 @@ export default function Sidebar() {
           <a href="/" class="text-xl font-bold text-blue-900 tracking-tight" onClick={close}>
             RedNorte
           </a>
-          <button
-            onClick={close}
-            class="p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-            aria-label="Cerrar menú"
-          >
-            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <div class="flex items-center gap-1">
+            {user && <NotificationBell />}
+            <button
+              onClick={close}
+              class="p-1.5 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              aria-label="Cerrar menú"
+            >
+              <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Navigation */}
