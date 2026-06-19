@@ -36,7 +36,24 @@ export class WaitlistService {
       status: "waiting",
     };
 
-    return await waitlistRepository.addToWaitlist(newEntry);
+    const result = await waitlistRepository.addToWaitlist(newEntry);
+
+    const eventPayload = {
+      userId: data.userId,
+      type: "WAITLIST_STATUS_CHANGED",
+      newStatus: "waiting",
+      message: "Has sido añadido a la lista de espera con estado: waiting",
+      timestamp: new Date().toISOString(),
+    };
+
+    publishNotification(eventPayload).catch((err) => {
+      console.error(
+        "[!] Hubo un error al enviar notificación a RabbitQM:",
+        err,
+      );
+    });
+
+    return result;
   }
 
   // Obtiene la lista de todos los pacientes en la base de datos
