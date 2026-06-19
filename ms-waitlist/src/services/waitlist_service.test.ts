@@ -112,4 +112,16 @@ describe("Waitlist Service - Pruebas de Lógica de Negocio", () => {
     expect(result[0].user_id).toBe("uuid-paciente-1");
     expect(result[0].priority).toBe(2);
   });
+
+  test("Debería lanzar error si el userId está vacío al añadir paciente", async () => {
+    expect(service.addPatientToWaitlist({ userId: "", priority: 2, reason: "Consulta general" })).rejects.toThrow(
+      "El usuario debe estar asociado a un ID",
+    );
+  });
+
+  test("Debería lanzar error si el nuevo estado no es válido en updateStatus", async () => {
+    expect(service.updateStatus(123, "estado_invalido" as any)).rejects.toThrow(
+      "El nuevo estado no es válido",
+    );
+  });
 });

@@ -16,6 +16,8 @@
     "postgres": "^3.4.9"
   },
   "scripts": {
-    "migrate": "bun run src/db/migrate.ts"
+    "migrate": "bun run src/db/migrate.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
   }
 }

@@ -97,4 +97,16 @@ describe("User Repository - Pruebas de Base de Datos Aislada", () => {
     const result = await userRepository.findByEmail("noexiste@mail.com") as any;
     expect(result).toBeNull();
   });
+
+  test("Debería obtener las credenciales de un usuario por email", async () => {
+    const result = await userRepository.getUserCredentials("juan@mail.com") as any;
+    expect(result).toBeDefined();
+    expect(result.email).toBe("juan@mail.com");
+    expect(result.password).toBe("hashed_password_aqui");
+  });
+
+  test("Debería retornar null si no se encuentran credenciales para el email", async () => {
+    const result = await userRepository.getUserCredentials("noexiste@mail.com") as any;
+    expect(result).toBeNull();
+  });
 });

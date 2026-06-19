@@ -49,12 +49,32 @@ const spyGetCredentials = spyOn(
   return null;
 });
 
+const spyFindAllUsers = spyOn(userRepository, "findAllUsers").mockImplementation(
+  async () => {
+    return [
+      { id: "uuid-123", first_name: "Juan", email: "juan@mail.com" },
+      { id: "uuid-456", first_name: "Ana", email: "ana@mail.com" },
+    ] as any;
+  },
+);
+
+const spyFindUserById = spyOn(userRepository, "findUserById").mockImplementation(
+  async (id: string) => {
+    if (id === "uuid-123") {
+      return { id: "uuid-123", first_name: "Juan", email: "juan@mail.com" } as any;
+    }
+    return null;
+  },
+);
+
 // Limpieza absoluta al terminar el archivo
 afterAll(() => {
   spyFindByEmail.mockRestore();
   spyFindRoleIdByKey.mockRestore();
   spyCreateUser.mockRestore();
   spyGetCredentials.mockRestore();
+  spyFindAllUsers.mockRestore();
+  spyFindUserById.mockRestore();
 });
 
 describe("User Service - Pruebas de Lógica de Negocio", () => {
@@ -115,6 +135,30 @@ describe("User Service - Pruebas de Lógica de Negocio", () => {
 
     expect(service.loginUser(payload)).rejects.toThrow(
       "Credenciales inválidas",
+    );
+  });
+
+  test("Debería lanzar error si faltan campos obligatorios al registrar", async () => {
+    expect(service.registerUser({ email: "solo@mail.com" } as any)).rejects.toThrow(
+      "Los campos obligatorios se encuentran vacíos",
+    );
+  });
+
+  test("Debería retornar todos los usuarios registrados", async () => {
+    const result = await service.findUsers();
+    expect(result).toBeArray();
+    expect(result.length).toBe(2);
+  });
+
+  test("Debería retornar un usuario por su ID si existe", async () => {
+    const result = await service.findUserById("uuid-123");
+    expect(result).toBeDefined();
+    expect(result.first_name).toBe("Juan");
+  });
+
+  test("Debería lanzar error si el usuario por ID no existe", async () => {
+    expect(service.findUserById("uuid-999")).rejects.toThrow(
+      "Usuario no encontrado",
     );
   });
 });

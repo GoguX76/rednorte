@@ -2,6 +2,26 @@ import { expect, test, describe, spyOn, afterAll } from "bun:test";
 import { UserService } from "../services/user_service";
 import { registerUserHandler, loginUserHandler } from "./user_controller";
 
+const spyFindUsers = spyOn(
+  UserService.prototype,
+  "findUsers",
+).mockImplementation(async () => {
+  return [
+    { id: "uuid-123", first_name: "Juan", email: "juan@mail.com" },
+    { id: "uuid-456", first_name: "Ana", email: "ana@mail.com" },
+  ] as any;
+});
+
+const spyFindUserById = spyOn(
+  UserService.prototype,
+  "findUserById",
+).mockImplementation(async (id: string) => {
+  if (id === "uuid-123") {
+    return { id: "uuid-123", first_name: "Juan", email: "juan@mail.com" };
+  }
+  throw new Error("Usuario no encontrado");
+});
+
 // Guardamos los espías en constantes para poder destruirlos al final
 const spyRegister = spyOn(
   UserService.prototype,
@@ -36,6 +56,8 @@ const spyLogin = spyOn(UserService.prototype, "loginUser").mockImplementation(
 afterAll(() => {
   spyRegister.mockRestore();
   spyLogin.mockRestore();
+  spyFindUsers.mockRestore();
+  spyFindUserById.mockRestore();
 });
 
 describe("User Controller - Pruebas de Handlers HTTP", () => {
@@ -104,5 +126,55 @@ describe("User Controller - Pruebas de Handlers HTTP", () => {
     expect(response.status).toBe(401);
     expect(response.body.success).toBe(false);
     expect(response.body.message).toBe("Credenciales inválidas");
+  });
+
+  test("Debería devolver HTTP 200 y la lista de usuarios", async () => {
+    const mockContext = {
+      json: (data: any, status: number) => ({ body: data, status }),
+    } as any;
+
+    const response = await (await import("./user_controller")).findUsersHandler(mockContext) as any;
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data).toBeArray();
+    expect(response.body.data.length).toBe(2);
+  });
+
+  test("Debería devolver HTTP 200 y el usuario si el ID existe", async () => {
+    const mockContext = {
+      req: { param: (name: string) => "uuid-123" },
+      json: (data: any, status: number) => ({ body: data, status }),
+    } as any;
+
+    const response = await (await import("./user_controller")).findUserByIdHandler(mockContext) as any;
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data.first_name).toBe("Juan");
+  });
+
+  test("Debería devolver HTTP 400 si falta el ID en la URL", async () => {
+    const mockContext = {
+      req: { param: (name: string) => undefined },
+      json: (data: any, status: number) => ({ body: data, status }),
+    } as any;
+
+    const response = await (await import("./user_controller")).findUserByIdHandler(mockContext) as any;
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+  });
+
+  test("Debería devolver HTTP 404 si el usuario por ID no existe", async () => {
+    const mockContext = {
+      req: { param: (name: string) => "uuid-999" },
+      json: (data: any, status: number) => ({ body: data, status }),
+    } as any;
+
+    const response = await (await import("./user_controller")).findUserByIdHandler(mockContext) as any;
+
+    expect(response.status).toBe(404);
+    expect(response.body.success).toBe(false);
   });
 });
