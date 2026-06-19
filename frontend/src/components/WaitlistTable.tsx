@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
+import { useStore } from '@nanostores/preact';
+import { $user } from '../stores/auth';
 import { api, ApiError, type WaitlistEntry } from '../lib/api';
 
 const PRIORITY_LABELS: Record<number, string> = {
@@ -33,7 +35,9 @@ export default function WaitlistTable() {
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const user = useStore($user);
 
+  const isPatient = user?.role_id === 'rol_patient';
   const hasToken = typeof localStorage !== 'undefined' && !!localStorage.getItem('token');
 
   useEffect(() => {
@@ -43,13 +47,13 @@ export default function WaitlistTable() {
       return;
     }
     loadQueue();
-  }, []);
+  }, [user]);
 
   const loadQueue = async () => {
     setLoading(true);
     setError('');
     try {
-      const data = await api.waitlist.getQueue();
+      const data = isPatient ? await api.waitlist.getMyQueue() : await api.waitlist.getQueue();
       setEntries(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar la lista');
@@ -103,7 +107,7 @@ export default function WaitlistTable() {
   if (entries.length === 0) {
     return (
       <div class="text-center py-12 text-gray-400">
-        No hay pacientes en la lista de espera
+        {isPatient ? 'No tienes turnos registrados' : 'No hay pacientes en la lista de espera'}
       </div>
     );
   }

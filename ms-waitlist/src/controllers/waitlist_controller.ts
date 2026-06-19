@@ -27,6 +27,18 @@ export const getQueueHandler = async (c: Context) => {
   }
 };
 
+// Función que permite a un usuario ver solo sus propias entradas en la waitlist
+export const getMyQueueHandler = async (c: Context) => {
+  try {
+    const payload: any = c.get('jwtPayload');
+    const userId = payload.id;
+    const queue = await service.getMyQueue(userId);
+    return c.json({ success: true, data: queue }, 200);
+  } catch (error: any) {
+    return c.json({ success: false, message: error.message }, 500);
+  }
+};
+
 // Función que permite actualizar el estado de un paciente en la lista de espera
 export const updateStatusHandler = async (c: Context) => {
   try {

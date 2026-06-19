@@ -79,6 +79,20 @@
       ]
     },
     {
+      "endpoint": "/api/waitlist/mine",
+      "method": "GET",
+      "output_encoding": "no-op",
+      "input_headers": ["Authorization"],
+      "backend": [
+        {
+          "url_pattern": "/waitlist/mine",
+          "host": ["http://ms-waitlist:3000"],
+          "disable_host_sanitize": true,
+          "headers_to_pass": ["Authorization"]
+        }
+      ]
+    },
+    {
       "endpoint": "/api/waitlist",
       "method": "GET",
       "output_encoding": "no-op",

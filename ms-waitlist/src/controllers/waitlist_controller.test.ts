@@ -1,6 +1,6 @@
 import { expect, test, describe, spyOn, afterAll } from "bun:test";
 import { WaitlistService } from "../services/waitlist_service";
-import { addPatientHandler, getQueueHandler, updateStatusHandler } from "./waitlist_controller";
+import { addPatientHandler, getQueueHandler, getMyQueueHandler, updateStatusHandler } from "./waitlist_controller";
 
 // 1. Aislamiento completo de la capa de servicio mediante espías en el prototipo [cite: 76]
 const spyAddPatient = spyOn(WaitlistService.prototype, "addPatientToWaitlist").mockImplementation(async (data: any) => {
@@ -16,6 +16,15 @@ const spyGetQueue = spyOn(WaitlistService.prototype, "getQueue").mockImplementat
   ] as any;
 });
 
+const spyGetMyQueue = spyOn(WaitlistService.prototype, "getMyQueue").mockImplementation(async (userId) => {
+  if (!userId) {
+    throw new Error("Usuario no autenticado");
+  }
+  return [
+    { id: 456, user_id: userId, priority: 2, status: "waiting", reason: "Consulta general" }
+  ] as any;
+});
+
 const spyUpdateStatus = spyOn(WaitlistService.prototype, "updateStatus").mockImplementation(async (id: number, newStatus: any) => {
   if (id === 999) {
     throw new Error("Registro no encontrado en la lista de espera");
@@ -27,6 +36,7 @@ const spyUpdateStatus = spyOn(WaitlistService.prototype, "updateStatus").mockImp
 afterAll(() => {
   spyAddPatient.mockRestore();
   spyGetQueue.mockRestore();
+  spyGetMyQueue.mockRestore();
   spyUpdateStatus.mockRestore();
 });
 
@@ -121,5 +131,24 @@ describe("Waitlist Controller - Pruebas de Handlers HTTP", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.data.status).toBe("finished");
+  });
+
+  test("Debería devolver HTTP 200 y las entradas del usuario autenticado en getMyQueueHandler", async () => {
+    const mockContext = {
+      get: (key: string) => {
+        if (key === "jwtPayload") {
+          return { id: "usuario-test-1", email: "test@test.com", role_id: "rol_patient" };
+        }
+        return null;
+      },
+      json: (data: any, status: number) => ({ body: data, status })
+    } as any;
+
+    const response = await getMyQueueHandler(mockContext) as any;
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body.data).toBeArray();
+    expect(response.body.data[0].user_id).toBe("usuario-test-1");
   });
 });

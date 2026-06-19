@@ -32,5 +32,15 @@ export const waitlistRepository = {
       RETURNING *;
     `;
     return result[0];
+  },
+
+  // Busca entradas de la waitlist por ID de usuario
+  async findByUserId(userId: string) {
+    const result = await sql`
+      SELECT * FROM waitlist_entries
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC;
+    `;
+    return result;
   }
 }
