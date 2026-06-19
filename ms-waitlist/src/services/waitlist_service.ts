@@ -44,6 +44,11 @@ export class WaitlistService {
     return waitlistRepository.getPendingPatients(); // Usa la función del repositorio para obtener a todos los pacientes de la lista
   }
 
+  // Obtiene las entradas de la waitlist para un usuario específico
+  async getMyQueue(userId: string) {
+    return waitlistRepository.findByUserId(userId);
+  }
+
   // Actualiza el estado del paciente en la lista de espera
   async updateStatus(id: number, newStatus: WaitlistStatus) {
     // Valida que el nuevo estado del paciente este dentro de los permitidos en el sistema

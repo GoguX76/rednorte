@@ -83,4 +83,12 @@ describe("Waitlist Repository - Pruebas de Base de Datos Aislada", () => {
     expect(result.id).toBe(101);
     expect(result.status).toBe("attending");
   });
+
+  test("Debería ejecutar SELECT por user_id y retornar las entradas del usuario", async () => {
+    const result = await waitlistRepository.findByUserId("uuid-1") as any;
+
+    expect(result).toBeArray();
+    expect(result.length).toBe(2);
+    expect(result[0].user_id).toBe("uuid-1");
+  });
 });

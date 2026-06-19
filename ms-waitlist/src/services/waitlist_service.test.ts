@@ -27,6 +27,19 @@ const spyGetPendingPatients = spyOn(waitlistRepository, "getPendingPatients").mo
   ] as any; // <-- Forzamos a TypeScript a aceptar el array simulado
 });
 
+const spyFindByUserId = spyOn(waitlistRepository, "findByUserId").mockImplementation(async (userId) => {
+  return [
+    {
+      id: 456,
+      user_id: userId,
+      priority: 2,
+      status: "waiting",
+      reason: "Consulta general",
+      created_at: new Date()
+    }
+  ] as any;
+});
+
 const spyUpdateStatus = spyOn(waitlistRepository, "updateStatus").mockImplementation(async (id, newStatus) => {
   if (id === 999) {
     return null;
@@ -45,6 +58,7 @@ const spyUpdateStatus = spyOn(waitlistRepository, "updateStatus").mockImplementa
 afterAll(() => {
   spyAddToWaitlist.mockRestore();
   spyGetPendingPatients.mockRestore();
+  spyFindByUserId.mockRestore();
   spyUpdateStatus.mockRestore();
 });
 
@@ -88,5 +102,14 @@ describe("Waitlist Service - Pruebas de Lógica de Negocio", () => {
     expect(result).toBeDefined();
     expect(result.id).toBe(123);
     expect(result.status).toBe("attending");
+  });
+
+  test("Debería retornar las entradas de la waitlist para un usuario específico", async () => {
+    const result = await service.getMyQueue("uuid-paciente-1") as any;
+
+    expect(result).toBeArray();
+    expect(result.length).toBe(1);
+    expect(result[0].user_id).toBe("uuid-paciente-1");
+    expect(result[0].priority).toBe(2);
   });
 });
