@@ -70,6 +70,7 @@ export const api = {
   },
   waitlist: {
     getQueue: () => request<WaitlistEntry[]>('/waitlist'),
+    getMyQueue: () => request<WaitlistEntry[]>('/waitlist/mine'),
     addPatient: (data: { userId: string; priority: number; reason: string }) =>
       request<WaitlistEntry>('/waitlist', { method: 'POST', body: JSON.stringify(data) }),
     updateStatus: (id: number, status: string) =>
