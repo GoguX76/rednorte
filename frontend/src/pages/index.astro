@@ -2,49 +2,172 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="RedNorte - Inicio">
-  <section class="text-center py-16">
-    <h1 class="text-4xl font-bold text-gray-800 mb-4">
-      Bienvenido a RedNorte
-    </h1>
-    <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-      Sistema de gestión de lista de espera médica. Administración eficiente de pacientes,
-      priorización automática y seguimiento en tiempo real.
-    </p>
-    <div class="flex gap-4 justify-center">
-      <a
-        href="/login"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-      >
-        Iniciar Sesión
-      </a>
-      <a
-        href="/waitlist"
-        class="bg-white hover:bg-gray-50 text-blue-600 border border-blue-600 px-6 py-3 rounded-lg font-medium transition-colors"
-      >
-        Ver Lista de Espera
-      </a>
+<Layout title="RedNorte — Transformando la gestión médica">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white px-8 py-24 md:py-32">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+        RedNorte
+      </h1>
+      <p class="text-xl md:text-2xl text-blue-100 mb-4 max-w-3xl mx-auto font-medium">
+        Transformando la gestión de listas de espera médicas con tecnología inteligente
+      </p>
+      <p class="text-lg text-blue-200 mb-12 max-w-3xl mx-auto leading-relaxed">
+        RedNorte es una plataforma moderna que optimiza la administración de pacientes,
+        prioriza casos críticos y facilita la comunicación entre el personal médico y
+        los pacientes.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/about"
+          class="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors shadow-lg"
+        >
+          Conocer más
+        </a>
+        <a
+          href="/register"
+          class="bg-blue-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-400 transition-colors shadow-lg"
+        >
+          Comenzar ahora
+        </a>
+      </div>
     </div>
   </section>
 
-  <section class="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto pb-16">
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-800 mb-2">Priorización Inteligente</h2>
-      <p class="text-gray-600 text-sm">
-        Clasificación automática de pacientes por nivel de urgencia: Baja, Media, Alta y Urgencia.
-      </p>
+  <!-- About -->
+  <section class="py-20 px-8 bg-white">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-8 text-center">
+        Sobre RedNorte
+      </h2>
+      <div class="w-16 h-1 bg-blue-700 mx-auto mb-8 rounded-full" />
+      <div class="text-lg text-slate-600 space-y-5 max-w-3xl mx-auto leading-relaxed">
+        <p>
+          RedNorte nace con la misión de transformar la forma en que los centros de
+          salud gestionan sus listas de espera médicas. Sabemos que cada minuto cuenta
+          cuando se trata de la salud de las personas.
+        </p>
+        <p>
+          Nuestra plataforma ofrece un sistema inteligente de priorización que asegura
+          que los casos más urgentes reciban atención inmediata, mientras optimiza el
+          flujo de pacientes para maximizar la eficiencia del personal médico.
+        </p>
+      </div>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-800 mb-2">Seguimiento en Tiempo Real</h2>
-      <p class="text-gray-600 text-sm">
-        Estados actualizados: En Espera, En Atención, Finalizado y Cancelado.
+  </section>
+
+  <!-- Values -->
+  <section class="py-20 px-8 bg-slate-50">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4 text-center">
+        Nuestra Filosofía
+      </h2>
+      <p class="text-lg text-slate-500 text-center mb-12 max-w-2xl mx-auto">
+        Principios que guían cada decisión en RedNorte
       </p>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-slate-200 text-center hover:shadow-md transition-shadow">
+          <div class="text-5xl mb-5">🎯</div>
+          <h3 class="text-xl font-bold text-slate-800 mb-3">Misión</h3>
+          <p class="text-slate-600 leading-relaxed">
+            Facilitar el acceso a la atención médica mediante tecnología que priorice
+            la urgencia y optimice los recursos hospitalarios.
+          </p>
+        </div>
+        <div class="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-slate-200 text-center hover:shadow-md transition-shadow">
+          <div class="text-5xl mb-5">👁️</div>
+          <h3 class="text-xl font-bold text-slate-800 mb-3">Visión</h3>
+          <p class="text-slate-600 leading-relaxed">
+            Ser el estándar nacional en gestión de listas de espera médicas,
+            reconocidos por nuestra eficiencia y compromiso con el paciente.
+          </p>
+        </div>
+        <div class="bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-slate-200 text-center hover:shadow-md transition-shadow">
+          <div class="text-5xl mb-5">💚</div>
+          <h3 class="text-xl font-bold text-slate-800 mb-3">Valores</h3>
+          <p class="text-slate-600 leading-relaxed">
+            Compromiso, transparencia, innovación y empatía. Cada paciente merece una
+            atención oportuna y de calidad.
+          </p>
+        </div>
+      </div>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-800 mb-2">Acceso Seguro</h2>
-      <p class="text-gray-600 text-sm">
-        Autenticación JWT con roles de paciente, médico y administrador.
+  </section>
+
+  <!-- Features -->
+  <section class="py-20 px-8 bg-white">
+    <div class="max-w-4xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-bold text-slate-800 mb-4 text-center">
+        ¿Por qué RedNorte?
+      </h2>
+      <p class="text-lg text-slate-500 text-center mb-12 max-w-2xl mx-auto">
+        Tecnología pensada para pacientes y profesionales de la salud
       </p>
+      <div class="grid md:grid-cols-2 gap-x-12 gap-y-10">
+        <div class="flex gap-5">
+          <div class="text-3xl flex-shrink-0 mt-1">⏱️</div>
+          <div>
+            <h3 class="font-bold text-slate-800 text-lg mb-1">Priorización Automática</h3>
+            <p class="text-slate-600 leading-relaxed">
+              Clasificación inteligente de pacientes por nivel de urgencia.
+            </p>
+          </div>
+        </div>
+        <div class="flex gap-5">
+          <div class="text-3xl flex-shrink-0 mt-1">🔔</div>
+          <div>
+            <h3 class="font-bold text-slate-800 text-lg mb-1">Notificaciones en Tiempo Real</h3>
+            <p class="text-slate-600 leading-relaxed">
+              Mantente informado al instante sobre cambios en tu estado.
+            </p>
+          </div>
+        </div>
+        <div class="flex gap-5">
+          <div class="text-3xl flex-shrink-0 mt-1">🔒</div>
+          <div>
+            <h3 class="font-bold text-slate-800 text-lg mb-1">Acceso Seguro</h3>
+            <p class="text-slate-600 leading-relaxed">
+              Autenticación JWT con roles para pacientes, médicos y administradores.
+            </p>
+          </div>
+        </div>
+        <div class="flex gap-5">
+          <div class="text-3xl flex-shrink-0 mt-1">📊</div>
+          <div>
+            <h3 class="font-bold text-slate-800 text-lg mb-1">Seguimiento en Tiempo Real</h3>
+            <p class="text-slate-600 leading-relaxed">
+              Estados actualizados: En Espera, En Atención, Finalizado y Cancelado.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 px-8 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-4">
+        ¿Listo para transformar tu centro de salud?
+      </h2>
+      <p class="text-lg text-blue-200 mb-10 max-w-2xl mx-auto leading-relaxed">
+        Únete a RedNorte y descubre cómo la tecnología puede mejorar la atención médica
+        para todos.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/register"
+          class="bg-white text-blue-900 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-colors shadow-lg"
+        >
+          Crear una cuenta
+        </a>
+        <a
+          href="/login"
+          class="bg-blue-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-400 transition-colors shadow-lg"
+        >
+          Iniciar Sesión
+        </a>
+      </div>
     </div>
   </section>
 </Layout>
