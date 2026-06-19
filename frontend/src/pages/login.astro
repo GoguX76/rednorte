@@ -3,8 +3,14 @@ import Layout from '../layouts/Layout.astro';
 import LoginForm from '../components/LoginForm';
 ---
 
-<Layout title="RedNorte - Iniciar Sesión">
-  <section class="py-12">
+<Layout title="RedNorte — Iniciar Sesión">
+  <section class="py-12 px-8">
+    <h1 class="text-3xl md:text-4xl font-bold text-slate-800 mb-2 text-center">
+      Iniciar Sesión
+    </h1>
+    <p class="text-lg text-slate-500 text-center mb-8">
+      Accede a tu cuenta para gestionar la lista de espera
+    </p>
     <LoginForm client:load />
   </section>
 </Layout>
