@@ -18,7 +18,7 @@ services:
 
   ms-users:
     build:
-      context: ./ms-users
+      context: ./backend/ms-users
     container_name: rednorte-ms-users
     ports:
       - "3001:3001"
@@ -49,7 +49,7 @@ services:
 
   ms-waitlist:
     build:
-      context: ./ms-waitlist
+      context: ./backend/ms-waitlist
     container_name: rednorte-ms-waitlist
     ports:
       - "3000:3000"
@@ -83,7 +83,7 @@ services:
 
   ms-notifications:
     build:
-      context: ./ms-notifications
+      context: ./backend/ms-notifications
     container_name: rednorte-ms-notifications
     ports:
       - "3002:3002"
@@ -101,7 +101,7 @@ services:
     image: krakend:2.13.7
     container_name: rednorte-krakend
     volumes:
-      - ./krakend:/etc/krakend
+      - ./backend/bff:/etc/krakend
     ports:
       - "8080:8080"
     depends_on:

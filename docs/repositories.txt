@@ -1,0 +1,59 @@
+Repositorios del Proyecto RedNorte — Servicio Público de Salud
+===============================================================
+
+Los componentes del proyecto están versionados en un único repositorio
+monorepo en GitHub. Cada componente se encuentra en su propia ruta
+dentro del mismo repositorio:
+
+  URL: https://github.com/GoguX76/rednorte
+
+Estructura del repositorio:
+---------------------------
+
+rednorte/                            # Repositorio Principal
+├── frontend/                        # Repositorio Frontend
+├── backend/
+│   ├── bff/                         # API Gateway KrakenD
+│   ├── ms-users/                    # Microservicio de Usuarios
+│   ├── ms-waitlist/                 # Microservicio de Lista de Espera
+│   └── ms-notifications/            # Microservicio de Notificaciones
+├── docs/                            # Documentación y diagramas
+├── docker-compose.yml               # Orquestación de contenedores
+└── README.md                        # Documentación principal
+
+Descripción de cada componente:
+--------------------------------
+
+Repositorio Principal
+  Ruta: https://github.com/GoguX76/rednorte
+  Contiene la documentación general, docker-compose, guías del proyecto
+  y la organización completa del monorepo.
+
+Repositorio Frontend
+  Ruta: https://github.com/GoguX76/rednorte/tree/main/frontend
+  Aplicación web con Astro 4, Preact 10, Nanostores y Tailwind CSS 3.
+  Interfaz de usuario para pacientes: registro, login, visualización de
+  turnos y notificaciones en tiempo real vía WebSocket.
+
+Repositorio ms-users
+  Ruta: https://github.com/GoguX76/rednorte/tree/main/backend/ms-users
+  Microservicio de autenticación y usuarios (Hono + Bun + PostgreSQL).
+  Maneja registro, login y emisión de JWT. Expone API REST consumida
+  a través del API Gateway.
+
+Repositorio ms-waitlist
+  Ruta: https://github.com/GoguX76/rednorte/tree/main/backend/ms-waitlist
+  Microservicio de gestión de lista de espera hospitalaria
+  (Hono + Bun + PostgreSQL + RabbitMQ). Permite agregar pacientes,
+  consultar, actualizar estado y publicar eventos de notificación.
+
+Repositorio ms-notifications
+  Ruta: https://github.com/GoguX76/rednorte/tree/main/backend/ms-notifications
+  Microservicio de notificaciones en tiempo real
+  (Bun.serve + WebSocket + PostgreSQL + RabbitMQ). Consume eventos
+  de RabbitMQ y los entrega al usuario vía WebSocket.
+
+Repositorio backend/bff
+  Ruta: https://github.com/GoguX76/rednorte/tree/main/backend/bff
+  API Gateway KrakenD 2.13.7 que expone los endpoints en /api/*,
+  maneja CORS y pasa headers JWT hacia los microservicios.

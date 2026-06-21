@@ -5,6 +5,7 @@ export default defineConfig({
     environment: "happy-dom",
     include: ["src/**/*.test.{ts,tsx}"],
     globals: true,
+    setupFiles: ["src/test-setup.ts"],
   },
   esbuild: {
     jsx: "automatic",

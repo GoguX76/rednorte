@@ -6,3 +6,29 @@ dist/
 ./dist
 *.db
 .env
+.env.local
+.env.*.local
+
+# code coverage
+coverage/
+*.lcov
+
+# deliverable
+*.zip
+*.rar
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+
+# lock files
+docs/.~lock*

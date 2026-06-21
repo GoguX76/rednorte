@@ -1,0 +1,199 @@
+{
+  "info": {
+    "name": "RedNorte API",
+    "description": "API Gateway KrakenD — Colección de endpoints del sistema de lista de espera médica",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://localhost:8080/api/auth/users/login",
+          "host": ["http://localhost:8080"],
+          "path": ["api", "auth", "users", "login"]
+        },
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"paciente@test.com\",\n  \"password\": \"123456\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Login exitoso",
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzI1NiIs...\",\n    \"user\": {\n      \"id\": \"usr_123\",\n      \"first_name\": \"Juan\",\n      \"last_name\": \"Pérez\",\n      \"email\": \"paciente@test.com\",\n      \"role_id\": \"rol_patient\"\n    }\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Auth - Registrar usuario",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://localhost:8080/api/auth/users",
+          "host": ["http://localhost:8080"],
+          "path": ["api", "auth", "users"]
+        },
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"first_name\": \"María\",\n  \"last_name\": \"González\",\n  \"email\": \"maria@test.com\",\n  \"password\": \"123456\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Registro exitoso",
+          "status": "Created",
+          "code": 201,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"usr_456\",\n    \"first_name\": \"María\",\n    \"last_name\": \"González\",\n    \"email\": \"maria@test.com\",\n    \"role_id\": \"rol_patient\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Auth - Listar usuarios",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/api/auth/users",
+          "host": ["http://localhost:8080"],
+          "path": ["api", "auth", "users"]
+        }
+      },
+      "response": [
+        {
+          "name": "Lista de usuarios",
+          "code": 200,
+          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_123\",\n      \"first_name\": \"Juan\",\n      \"last_name\": \"Pérez\",\n      \"email\": \"paciente@test.com\",\n      \"role_id\": \"rol_patient\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Auth - Obtener usuario por ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/api/auth/users/usr_123",
+          "host": ["http://localhost:8080"],
+          "path": ["api", "auth", "users", "usr_123"]
+        }
+      },
+      "response": [
+        {
+          "name": "Usuario encontrado",
+          "code": 200,
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"usr_123\",\n    \"first_name\": \"Juan\",\n    \"last_name\": \"Pérez\",\n    \"email\": \"paciente@test.com\",\n    \"role_id\": \"rol_patient\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Waitlist - Agregar paciente (Auth requerido)",
+      "request": {
+        "method": "POST",
+        "url": {
+          "raw": "http://localhost:8080/api/waitlist",
+          "host": ["http://localhost:8080"],
+          "path": ["api", "waitlist"]
+        },
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIs..." }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"usr_123\",\n  \"priority\": 2,\n  \"reason\": \"Control médico general\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Paciente agregado",
+          "code": 201,
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"user_id\": \"usr_123\",\n    \"priority\": 2,\n    \"status\": \"waiting\",\n    \"reason\": \"Control médico general\",\n    \"created_at\": \"2025-06-19T16:00:00.000Z\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Waitlist - Listar espera (Auth requerido)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/api/waitlist",
+          "host": ["http://localhost:8080"],
+          "path": ["api", "waitlist"]
+        },
+        "header": [
+          { "key": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIs..." }
+        ]
+      },
+      "response": [
+        {
+          "name": "Lista de espera",
+          "code": 200,
+          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"user_id\": \"usr_123\",\n      \"priority\": 2,\n      \"status\": \"waiting\",\n      \"reason\": \"Control médico general\",\n      \"created_at\": \"2025-06-19T16:00:00.000Z\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Waitlist - Mis turnos (Auth requerido)",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8080/api/waitlist/mine",
+          "host": ["http://localhost:8080"],
+          "path": ["api", "waitlist", "mine"]
+        },
+        "header": [
+          { "key": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIs..." }
+        ]
+      },
+      "response": [
+        {
+          "name": "Mis turnos",
+          "code": 200,
+          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"user_id\": \"usr_123\",\n      \"priority\": 2,\n      \"status\": \"waiting\",\n      \"reason\": \"Control médico general\",\n      \"created_at\": \"2025-06-19T16:00:00.000Z\"\n    }\n  ]\n}"
+        }
+      ]
+    },
+    {
+      "name": "Waitlist - Actualizar estado (Auth requerido)",
+      "request": {
+        "method": "PATCH",
+        "url": {
+          "raw": "http://localhost:8080/api/waitlist/1",
+          "host": ["http://localhost:8080"],
+          "path": ["api", "waitlist", "1"]
+        },
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer eyJhbGciOiJIUzI1NiIs..." }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"newStatus\": \"attending\"\n}"
+        }
+      },
+      "response": [
+        {
+          "name": "Estado actualizado",
+          "code": 200,
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"user_id\": \"usr_123\",\n    \"priority\": 2,\n    \"status\": \"attending\",\n    \"reason\": \"Control médico general\",\n    \"created_at\": \"2025-06-19T16:00:00.000Z\"\n  }\n}"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api"
+    }
+  ]
+}

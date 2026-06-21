@@ -1,0 +1,24 @@
+{
+  "name": "rednorte-backend",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun --format cjs",
+    "start": "bun run dist/index.js",
+    "migrate": "bun run src/db/migrate.ts",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage --coverage-reporter=text"
+  },
+  "dependencies": {
+    "@types/jsonwebtoken": "9.0.10",
+    "@types/node": "25.6.0",
+    "hono": "4.12.15",
+    "jsonwebtoken": "9.0.3",
+    "postgres": "^3.4.9",
+    "uuid": "14.0.0",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14"
+  }
+}

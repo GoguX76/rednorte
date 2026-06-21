@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head><title>Diagrama C3 - Componentes RedNorte</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  body { background: #fff; display: flex; justify-content: center; padding: 40px; }
+  .mermaid { max-width: 1300px; }
+</style>
+</head>
+<body>
+<div class="mermaid">
+graph TB
+
+    subgraph Frontend["Frontend (Astro + Preact)"]
+        PAGS[Páginas Astro]
+        COMP[Componentes Preact<br/>LoginForm, WaitlistTable<br/>NotificationBell, Sidebar]
+        STORES[Stores Nanostores<br/>auth, waitlist, notifications]
+        API[api.ts - Cliente HTTP]
+        WS[useNotifications Hook<br/>WebSocket + auto-reconnect]
+        PAGS --> COMP
+        COMP --> STORES
+        COMP --> API
+        WS --> STORES
+    end
+
+    subgraph KrakenD["API Gateway (KrakenD)"]
+        ROUTE[Routing: 9 endpoints<br/>/api/auth/* → ms-users<br/>/api/waitlist/* → ms-waitlist<br/>headers_to_pass: Authorization]
+    end
+
+    subgraph ms_users["ms-users (Hono + Bun - Puerto 3001)"]
+        UR[user_routes.ts<br/>POST GET /users, POST /users/login]
+        UC[user_controller.ts<br/>registerUserHandler<br/>loginUserHandler<br/>findUsersHandler]
+        US[user_service.ts<br/>register: valida, Argon2 hash, UUID<br/>login: verifica, firma JWT<br/>finders: consultas]
+        UREPO[user_repository.ts<br/>SQL: findByEmail, createUser<br/>findAllUsers, findUserById]
+        UDB[(users_db PostgreSQL)]
+        UERR[error-handler.ts<br/>AppError + onError]
+        UR --> UC
+        UC --> US
+        US --> UREPO
+        UREPO --> UDB
+        UC -.-> UERR
+        US -.-> UERR
+    end
+
+    subgraph ms_waitlist["ms-waitlist (Hono + Bun - Puerto 3000)"]
+        WR[waitlist_routes.ts<br/>JWT middleware en todas<br/>POST GET / GET /mine PATCH /:id]
+        WC[waitlist_controller.ts<br/>addPatientHandler<br/>getQueueHandler<br/>getMyQueueHandler<br/>updateStatusHandler]
+        WSVC[waitlist_service.ts<br/>add: priority 1-4, reason ≥5<br/>updateStatus: valida estado,<br/>publica en RabbitMQ]
+        WREPO[waitlist_repository.ts<br/>SQL: addToWaitlist<br/>getPendingPatients<br/>updateStatus, findByUserId]
+        WDB[(waitlist_db PostgreSQL)]
+        PROD[rabbitmq/producer.ts<br/>publishNotification]
+        WERR[error-handler.ts<br/>AppError + onError]
+        WR --> WC
+        WC --> WSVC
+        WSVC --> WREPO
+        WREPO --> WDB
+        WSVC --> PROD
+        WC -.-> WERR
+        WSVC -.-> WERR
+    end
+
+    subgraph ms_notifications["ms-notifications (Bun.serve - Puerto 3002)"]
+        HTTP[HTTP: GET /health]
+        WSS[WebSocket: /ws?userId=]
+        CONN[connectionManager.ts<br/>Map userId → WebSocket]
+        CONS[rabbitmq/consumer.ts<br/>Escucha cola, parsea, ACK/NACK]
+        NSVC[notification_service.ts<br/>Guarda en DB + envía por WS]
+        NREPO[notification_repository.ts<br/>SQL: saveNotification]
+        NDB[(notifications_db PostgreSQL)]
+        HTTP --> CONS
+        WSS --> CONN
+        CONS --> NSVC
+        NSVC --> NREPO
+        NSVC --> CONN
+        NREPO --> NDB
+    end
+
+    subgraph RMQ["RabbitMQ"]
+        QUEUE[notifications_queue]
+    end
+
+    API -- "HTTP fetch" --> ROUTE
+    WS -- "WebSocket" --> WSS
+    ROUTE -- "/api/auth/*" --> UR
+    ROUTE -- "/api/waitlist/* con JWT" --> WR
+    PROD -- "Publica" --> QUEUE
+    QUEUE -- "Consume" --> CONS
+</div>
+</body>
+</html>
