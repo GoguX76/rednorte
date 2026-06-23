@@ -1,0 +1,130 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: krakend-config
+  namespace: rednorte
+data:
+  krakend.json: |
+    {
+      "$schema": "https://www.krakend.io/schema/v3.json",
+      "version": 3,
+      "name": "RedNorte API Gateway",
+      "cache_ttl": "0s",
+      "timeout": "5s",
+      "extra_config": {
+        "security/cors": {
+          "allow_origins": ["http://localhost:4321", "http://localhost", "http://rednorte.local"],
+          "allow_methods": ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+          "allow_headers": ["Authorization", "Content-Type"],
+          "expose_headers": ["Content-Type"],
+          "allow_credentials": true,
+          "max_age": "3600s"
+        }
+      },
+      "endpoints": [
+        {
+          "endpoint": "/api/auth/users/login",
+          "method": "POST",
+          "output_encoding": "no-op",
+          "backend": [
+            {
+              "url_pattern": "/users/login",
+              "host": ["http://ms-users:3001"],
+              "disable_host_sanitize": true
+            }
+          ]
+        },
+        {
+          "endpoint": "/api/auth/users",
+          "method": "POST",
+          "output_encoding": "no-op",
+          "backend": [
+            {
+              "url_pattern": "/users",
+              "host": ["http://ms-users:3001"],
+              "disable_host_sanitize": true
+            }
+          ]
+        },
+        {
+          "endpoint": "/api/auth/users",
+          "method": "GET",
+          "output_encoding": "no-op",
+          "backend": [
+            {
+              "url_pattern": "/users",
+              "host": ["http://ms-users:3001"],
+              "disable_host_sanitize": true
+            }
+          ]
+        },
+        {
+          "endpoint": "/api/auth/users/{id}",
+          "method": "GET",
+          "output_encoding": "no-op",
+          "backend": [
+            {
+              "url_pattern": "/users/{id}",
+              "host": ["http://ms-users:3001"],
+              "disable_host_sanitize": true
+            }
+          ]
+        },
+        {
+          "endpoint": "/api/waitlist",
+          "method": "POST",
+          "output_encoding": "no-op",
+          "input_headers": ["Authorization"],
+          "backend": [
+            {
+              "url_pattern": "/waitlist",
+              "host": ["http://ms-waitlist:3000"],
+              "disable_host_sanitize": true,
+              "headers_to_pass": ["Authorization"]
+            }
+          ]
+        },
+        {
+          "endpoint": "/api/waitlist/mine",
+          "method": "GET",
+          "output_encoding": "no-op",
+          "input_headers": ["Authorization"],
+          "backend": [
+            {
+              "url_pattern": "/waitlist/mine",
+              "host": ["http://ms-waitlist:3000"],
+              "disable_host_sanitize": true,
+              "headers_to_pass": ["Authorization"]
+            }
+          ]
+        },
+        {
+          "endpoint": "/api/waitlist",
+          "method": "GET",
+          "output_encoding": "no-op",
+          "input_headers": ["Authorization"],
+          "backend": [
+            {
+              "url_pattern": "/waitlist",
+              "host": ["http://ms-waitlist:3000"],
+              "disable_host_sanitize": true,
+              "headers_to_pass": ["Authorization"]
+            }
+          ]
+        },
+        {
+          "endpoint": "/api/waitlist/{id}",
+          "method": "PATCH",
+          "output_encoding": "no-op",
+          "input_headers": ["Authorization"],
+          "backend": [
+            {
+              "url_pattern": "/waitlist/{id}",
+              "host": ["http://ms-waitlist:3000"],
+              "disable_host_sanitize": true,
+              "headers_to_pass": ["Authorization"]
+            }
+          ]
+        }
+      ]
+    }

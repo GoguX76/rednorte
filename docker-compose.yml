@@ -103,7 +103,7 @@ services:
     volumes:
       - ./backend/bff:/etc/krakend
     ports:
-      - "8080:8080"
+      - "8083:8080"
     depends_on:
       ms-users:
         condition: service_started
