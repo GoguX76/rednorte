@@ -1,90 +1,98 @@
 <!DOCTYPE html>
 <html>
-<head><title>Diagrama C3 - Componentes RedNorte</title>
+<head><title>Diagrama C3 — Componentes RedNorte</title>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
 <style>
   body { background: #fff; display: flex; justify-content: center; padding: 40px; }
-  .mermaid { max-width: 1300px; }
+  .mermaid { max-width: 1200px; }
 </style>
 </head>
 <body>
 <div class="mermaid">
 graph TB
 
-    subgraph Frontend["Frontend (Astro + Preact)"]
-        PAGS[Páginas Astro]
-        COMP[Componentes Preact<br/>LoginForm, WaitlistTable<br/>NotificationBell, Sidebar]
-        STORES[Stores Nanostores<br/>auth, waitlist, notifications]
-        API[api.ts - Cliente HTTP]
-        WS[useNotifications Hook<br/>WebSocket + auto-reconnect]
-        PAGS --> COMP
-        COMP --> STORES
-        COMP --> API
-        WS --> STORES
+    Client((Navegador))
+
+    subgraph K8s["Kubernetes Cluster"]
+
+        ING["Ingress NGINX<br/>rednorte.local"]
+
+        subgraph FE["Frontend [Deployment :80]"]
+            PAGS["Páginas Astro (SSG)"]
+            PREACT["Componentes Preact<br/>LoginForm · WaitlistTable<br/>NotificationBell · Sidebar"]
+            STORE["Nanostores<br/>auth · waitlist · notifications"]
+            API["api.ts — Cliente HTTP"]
+            WS["useNotifications Hook<br/>WebSocket + auto-reconnect"]
+            PREACT --> STORE
+            PREACT --> API
+            WS --> STORE
+        end
+
+        subgraph GW["KrakenD [Deployment + ConfigMap :8080]"]
+            ROUTE["8 endpoints<br/>headers_to_pass: Authorization<br/>CORS: localhost, rednorte.local"]
+        end
+
+        subgraph USERS["ms-users [Deployment :3001]"]
+            U_PATH["Routes: POST GET /users, POST /users/login"]
+            U_SVC["Service: Argon2 hash · JWT sign · validación email"]
+            U_REPO["Repository: SQL — findByEmail, createUser"]
+            U_DB["(users_db [StatefulSet :5432])"]
+            U_ERR["AppError + onError handler"]
+            U_SVC --> U_REPO
+            U_REPO --> U_DB
+            U_SVC -.-> U_ERR
+        end
+
+        subgraph WAITLIST["ms-waitlist [Deployment :3000]"]
+            W_PATH["Routes: POST GET / GET /mine PATCH /:id<br/>JWT middleware (hono/jwt)"]
+            W_SVC["Service: prioridades 1-4 · cambio estado · producer RabbitMQ"]
+            W_REPO["Repository: SQL — addToWaitlist, updateStatus"]
+            W_DB["(waitlist_db [StatefulSet :5432])"]
+            W_PROD["rabbitmq/producer.ts<br/>publishNotification"]
+            W_ERR["AppError + onError handler"]
+            W_SVC --> W_REPO
+            W_SVC --> W_PROD
+            W_REPO --> W_DB
+            W_SVC -.-> W_ERR
+        end
+
+        subgraph NOTIF["ms-notifications [Deployment :3002]"]
+            N_CONS["rabbitmq/consumer.ts<br/>Escucha cola, parsea, ACK/NACK"]
+            N_SVC["Notification Service<br/>Guarda en DB + envía por WS"]
+            N_REPO["Repository: SQL — saveNotification"]
+            N_DB["(notifications_db [StatefulSet :5432])"]
+            N_CONN["connectionManager.ts<br/>Map userId → WebSocket"]
+            N_CONS --> N_SVC
+            N_SVC --> N_REPO
+            N_SVC --> N_CONN
+            N_REPO --> N_DB
+        end
+
+        subgraph RMQ["RabbitMQ [StatefulSet :5672]"]
+            QUEUE["notifications_queue"]
+        end
+
+        subgraph JOBS["Migraciones [batch/Job]"]
+            J1["migrate-users"]
+            J2["migrate-waitlist"]
+            J3["migrate-notifications"]
+        end
+
     end
 
-    subgraph KrakenD["API Gateway (KrakenD)"]
-        ROUTE[Routing: 9 endpoints<br/>/api/auth/* → ms-users<br/>/api/waitlist/* → ms-waitlist<br/>headers_to_pass: Authorization]
-    end
-
-    subgraph ms_users["ms-users (Hono + Bun - Puerto 3001)"]
-        UR[user_routes.ts<br/>POST GET /users, POST /users/login]
-        UC[user_controller.ts<br/>registerUserHandler<br/>loginUserHandler<br/>findUsersHandler]
-        US[user_service.ts<br/>register: valida, Argon2 hash, UUID<br/>login: verifica, firma JWT<br/>finders: consultas]
-        UREPO[user_repository.ts<br/>SQL: findByEmail, createUser<br/>findAllUsers, findUserById]
-        UDB[(users_db PostgreSQL)]
-        UERR[error-handler.ts<br/>AppError + onError]
-        UR --> UC
-        UC --> US
-        US --> UREPO
-        UREPO --> UDB
-        UC -.-> UERR
-        US -.-> UERR
-    end
-
-    subgraph ms_waitlist["ms-waitlist (Hono + Bun - Puerto 3000)"]
-        WR[waitlist_routes.ts<br/>JWT middleware en todas<br/>POST GET / GET /mine PATCH /:id]
-        WC[waitlist_controller.ts<br/>addPatientHandler<br/>getQueueHandler<br/>getMyQueueHandler<br/>updateStatusHandler]
-        WSVC[waitlist_service.ts<br/>add: priority 1-4, reason ≥5<br/>updateStatus: valida estado,<br/>publica en RabbitMQ]
-        WREPO[waitlist_repository.ts<br/>SQL: addToWaitlist<br/>getPendingPatients<br/>updateStatus, findByUserId]
-        WDB[(waitlist_db PostgreSQL)]
-        PROD[rabbitmq/producer.ts<br/>publishNotification]
-        WERR[error-handler.ts<br/>AppError + onError]
-        WR --> WC
-        WC --> WSVC
-        WSVC --> WREPO
-        WREPO --> WDB
-        WSVC --> PROD
-        WC -.-> WERR
-        WSVC -.-> WERR
-    end
-
-    subgraph ms_notifications["ms-notifications (Bun.serve - Puerto 3002)"]
-        HTTP[HTTP: GET /health]
-        WSS[WebSocket: /ws?userId=]
-        CONN[connectionManager.ts<br/>Map userId → WebSocket]
-        CONS[rabbitmq/consumer.ts<br/>Escucha cola, parsea, ACK/NACK]
-        NSVC[notification_service.ts<br/>Guarda en DB + envía por WS]
-        NREPO[notification_repository.ts<br/>SQL: saveNotification]
-        NDB[(notifications_db PostgreSQL)]
-        HTTP --> CONS
-        WSS --> CONN
-        CONS --> NSVC
-        NSVC --> NREPO
-        NSVC --> CONN
-        NREPO --> NDB
-    end
-
-    subgraph RMQ["RabbitMQ"]
-        QUEUE[notifications_queue]
-    end
-
-    API -- "HTTP fetch" --> ROUTE
-    WS -- "WebSocket" --> WSS
-    ROUTE -- "/api/auth/*" --> UR
-    ROUTE -- "/api/waitlist/* con JWT" --> WR
-    PROD -- "Publica" --> QUEUE
-    QUEUE -- "Consume" --> CONS
+    Client -- "HTTP/WS" --> ING
+    ING -- "/" --> PAGS
+    API -- "HTTP /api/*" --> ING
+    WS -- "WS /ws" --> ING
+    ING -- "/api" --> ROUTE
+    ING -- "/ws" --> N_CONN
+    ROUTE -- "auth/*" --> U_PATH
+    ROUTE -- "waitlist/*" --> W_PATH
+    W_PROD --> QUEUE
+    QUEUE --> N_CONS
+    J1 -. "schema" .-> U_DB
+    J2 -. "schema" .-> W_DB
+    J3 -. "schema" .-> N_DB
 </div>
 </body>
 </html>
