@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: rednorte
+
+resources:
+  - namespace.yaml
+  - secrets.yaml
+  - postgres
+  - rabbitmq
+  - jobs
+  - ms-users
+  - ms-waitlist
+  - ms-notifications
+  - krakend
+  - frontend
+  - ingress.yaml
