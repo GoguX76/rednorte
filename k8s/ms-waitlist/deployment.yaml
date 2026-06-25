@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-waitlist
+  namespace: rednorte
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-waitlist
+  template:
+    metadata:
+      labels:
+        app: ms-waitlist
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rednorte-secrets
+                  key: POSTGRES_USER
+          command:
+            - sh
+            - -c
+            - until pg_isready -h postgres-waitlist -U $POSTGRES_USER -d waitlist_db; do echo "waiting for postgres-waitlist"; sleep 2; done
+        - name: wait-for-rabbitmq
+          image: alpine:3.19
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - until nc -z rabbitmq 5672; do echo "waiting for rabbitmq"; sleep 2; done
+      containers:
+        - name: app
+          image: rednorte/ms-waitlist:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DATABASE_URL
+              value: postgres://root:root123@postgres-waitlist:5432/waitlist_db
+            - name: PORT
+              value: "3000"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: rednorte-secrets
+                  key: JWT_SECRET
+            - name: RABBITMQ_URL
+              value: amqp://root:root123@rabbitmq:5672
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 3
+            periodSeconds: 5

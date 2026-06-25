@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-users
+  namespace: rednorte
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-users
+  template:
+    metadata:
+      labels:
+        app: ms-users
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rednorte-secrets
+                  key: POSTGRES_USER
+          command:
+            - sh
+            - -c
+            - until pg_isready -h postgres-users -U $POSTGRES_USER -d users_db; do echo "waiting for postgres-users"; sleep 2; done
+      containers:
+        - name: app
+          image: rednorte/ms-users:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3001
+          env:
+            - name: DATABASE_URL
+              value: postgres://root:root123@postgres-users:5432/users_db
+            - name: PORT
+              value: "3001"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: rednorte-secrets
+                  key: JWT_SECRET
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 3
+            periodSeconds: 5

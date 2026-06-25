@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate-waitlist
+  namespace: rednorte
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: rednorte/ms-waitlist:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DATABASE_URL
+              value: postgres://root:root123@postgres-waitlist:5432/waitlist_db
+          command: ["bun", "run", "src/db/migrate.ts"]

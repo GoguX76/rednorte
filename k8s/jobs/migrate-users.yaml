@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate-users
+  namespace: rednorte
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: rednorte/ms-users:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DATABASE_URL
+              value: postgres://root:root123@postgres-users:5432/users_db
+          command: ["bun", "run", "src/db/migrate.ts"]

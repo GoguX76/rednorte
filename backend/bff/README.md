@@ -23,10 +23,19 @@ Gateway que enruta las peticiones del frontend a los microservicios internos.
 
 Archivo `krakend.json`. Los headers `Authorization` se pasan a los backends de waitlist mediante `input_headers` y `headers_to_pass`.
 
-CORS configurado solo para `http://localhost:4321` (frontend).
+CORS configurado para `http://localhost:4321` (frontend en Docker) y `http://rednorte.local` (frontend en Kubernetes).
+
+En Kubernetes la configuración se inyecta mediante ConfigMap. Ver `k8s/krakend/` para los manifiestos.
 
 ## Levantar
 
+### Docker Compose
 ```bash
 docker-compose up --build krakend
+```
+
+### Kubernetes
+```bash
+kubectl apply -k k8s/
+kubectl port-forward -n rednorte service/krakend 8083:8080
 ```

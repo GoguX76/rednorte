@@ -14,6 +14,8 @@ Interfaz web del sistema de gestión de lista de espera médica.
 | **Testing** | Vitest + happy-dom |
 | **Cobertura** | `@vitest/coverage-v8` |
 | **Tiempo real** | WebSocket nativo (Browser API) |
+| **Env vars** | `PUBLIC_API_URL`, `PUBLIC_WS_URL` |
+| **Servidor prod (K8s)** | NGINX alpine (sirve build estático) |
 | **Patrones de diseño** | Atomic Design (componentes), Store (Nanostores), Hook pattern, Observer (WebSocket), Adapter (API client) |
 
 ## Scripts
@@ -58,7 +60,9 @@ bun install
 bun run dev
 ```
 
-El frontend se conecta al API Gateway en `http://localhost:8080/api`.
+El frontend se conecta al API Gateway en `http://localhost:8080/api`. En Kubernetes se sirve con NGINX (ver `frontend/Dockerfile` y `k8s/frontend/`).
+
+Las variables `PUBLIC_API_URL` y `PUBLIC_WS_URL` se inyectan como build args al construir la imagen Docker para Kubernetes.
 
 ## Tests
 
