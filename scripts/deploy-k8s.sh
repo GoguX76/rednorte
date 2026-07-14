@@ -3,16 +3,20 @@ set -euo pipefail
 
 echo -e "\033[36m=== Construyendo imagenes Docker ===\033[0m"
 
-docker build -t rednorte/ms-users:latest        ./backend/ms-users
+docker build -t rednorte/ms-users:latest ./backend/ms-users
+kind load docker-image rednorte/ms-users:latest -n rednorte
 
-docker build -t rednorte/ms-waitlist:latest     ./backend/ms-waitlist
+docker build -t rednorte/ms-waitlist:latest ./backend/ms-waitlist
+kind load docker-image rednorte/ms-waitlist:latest -n rednorte
 
 docker build -t rednorte/ms-notifications:latest ./backend/ms-notifications
+kind load docker-image rednorte/ms-notifications:latest -n rednorte
 
 docker build \
   --build-arg PUBLIC_API_URL=http://localhost:8083/api \
   --build-arg PUBLIC_WS_URL=ws://localhost:3002/ws \
   -t rednorte/frontend:latest ./frontend
+kind load docker-image rednorte/frontend:latest -n rednorte
 
 echo -e "\n\033[36m=== Desplegando en Kubernetes ===\033[0m"
 kubectl apply -k k8s/

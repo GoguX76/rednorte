@@ -36,6 +36,13 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/rabbitmq
+          readinessProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - check_port_connectivity
+            initialDelaySeconds: 15
+            periodSeconds: 5
           livenessProbe:
             exec:
               command:
