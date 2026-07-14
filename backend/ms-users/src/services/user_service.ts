@@ -4,100 +4,131 @@ import { v4 as uuidv4 } from "uuid";
 import type { UserEntry } from "../models/user";
 import { AppError } from "../lib/app-error";
 
+/**
+ * Servicio de gestión de usuarios.
+ *
+ * Contiene la lógica de negocio para registro, login y consulta
+ * de usuarios. Coordina con {@link userRepository} para persistencia
+ * y aplica validaciones antes de cada operación.
+ */
 export class UserService {
-  // Función que registra el usuario e implementa lógica de negocio
+  /**
+   * Registra un nuevo usuario en el sistema.
+   *
+   * Flujo:
+   * 1. Valida que los campos obligatorios estén presentes
+   * 2. Verifica que el email no exista previamente
+   * 3. Busca el ID del rol `patient` en la base de datos
+   * 4. Hashea la contraseña con Argon2
+   * 5. Genera un UUID v4 y persiste el usuario
+   *
+   * @param userData - Datos del usuario (email, first_name, last_name, password)
+   * @returns El usuario creado con su UUID generado
+   * @throws {AppError} Si faltan campos obligatorios (400)
+   * @throws {AppError} Si el email ya está registrado (400)
+   * @throws {AppError} Si el rol `patient` no existe en la DB (500)
+   */
   async registerUser(userData: UserEntry) {
-    // Validamos si los campos tienen datos
     if (!userData.first_name || !userData.email || !userData.password) {
       throw new AppError("Los campos obligatorios se encuentran vacíos");
     }
 
-    // Almacenamos el resultado del repositorio para la función de encontrar por correo
     const existingEmail = await userRepository.findByEmail(userData.email);
 
-    // Si el correo existe, lanza error
     if (existingEmail) {
       throw new AppError("El correo ya existe");
     }
 
-    // Almacenamos el resultado del repositorio para función de encontrar por la key de role
     const roleId = await userRepository.findRoleIdByKey("patient");
 
-    // Si no se encuentra la key del rol en la DB, lanza error
     if (!roleId) {
       throw new AppError("El rol paciente no existe en la base de datos");
     }
 
-    const hashedPassword = await Bun.password.hash(userData.password); // Hasheamos la contraseña
-    userData.password = hashedPassword; // Cambiamos el password de userData a la password hasheada
+    const hashedPassword = await Bun.password.hash(userData.password);
+    userData.password = hashedPassword;
 
-    const newUserId = uuidv4(); // Crea una ID con un texto aleatorio
+    const newUserId = uuidv4();
     const newUser = await userRepository.createUser(
       newUserId,
       userData,
       roleId,
-    ); // Crea al usuario con los datos que trabajamos
-    return newUser; // Retorna los nuevos datos
+    );
+    return newUser;
   }
 
-  // Función que retorna los datos de todos los usuarios
+  /**
+   * Retorna la lista de todos los usuarios registrados.
+   *
+   * @returns Arreglo de usuarios con sus datos básicos
+   */
   async findUsers() {
     return userRepository.findAllUsers();
   }
 
-  // Función que retorna los datos de un usuario mediante su ID
+  /**
+   * Busca un usuario por su UUID.
+   *
+   * @param id - UUID del usuario a buscar
+   * @returns El usuario encontrado con sus datos completos
+   * @throws {AppError} Si no existe un usuario con ese ID (404)
+   */
   async findUserById(id: string) {
-    const user = await userRepository.findUserById(id); // Devuelve el ID que retorna el repository y lo guarda en una const
+    const user = await userRepository.findUserById(id);
 
-    // Si el ID del usuario no existe, lanza error
     if (!user) {
       throw new AppError("Usuario no encontrado", 404);
     }
 
-    // Si el ID del usuario existe, retorna el resultado
     return user;
   }
 
+  /**
+   * Autentica un usuario y genera un token JWT.
+   *
+   * Flujo:
+   * 1. Valida que email y password estén presentes
+   * 2. Busca las credenciales del usuario por email
+   * 3. Verifica la contraseña hasheada con Argon2
+   * 4. Genera un JWT con los datos públicos del usuario (id, email, role_id)
+   *
+   * @param userData - Credenciales de login (email y password)
+   * @returns Token JWT y datos del usuario autenticado
+   * @throws {AppError} Si faltan credenciales (400)
+   * @throws {AppError} Si el email no existe o la contraseña es incorrecta (401)
+   */
   async loginUser(userData: Pick<UserEntry, "email" | "password">) {
-    // Validamos que los campos tengan datos
     if (!userData.email || !userData.password) {
       throw new AppError("Faltan credenciales");
     }
 
-    // Obtiene el correo del usuario y lo guarda en una constante
     const credentials = await userRepository.getUserCredentials(userData.email);
 
-    // Si el correo es inválido lanza error
     if (!credentials) {
       throw new AppError("Credenciales inválidas", 401);
     }
 
-    // Comprueba si la contraseña normal y hasehada con iguales con Bun
     const isPasswordValid = await Bun.password.verify(
       userData.password,
       credentials.password,
     );
 
-    // Si la contraseña es inválida lanza error
     if (!isPasswordValid) {
       throw new AppError("Credenciales inválidas", 401);
     }
 
-    // Filtramos los datos que iran dentro del JWT
     const publicUserData = {
       id: credentials.id,
       email: credentials.email,
       role_id: credentials.role_id,
     };
 
-    // Fabricamos el token usando fallback si es que no existe la variable de entorno
     const token = jwt.sign(
       publicUserData,
       Bun.env.JWT_SECRET || "clave_secreta_desarrollo",
       { expiresIn: "2h" },
     );
 
-    // Retorna los datos necesarios
     return {
       token: token,
       user: publicUserData,

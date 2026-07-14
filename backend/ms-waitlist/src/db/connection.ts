@@ -1,13 +1,23 @@
 import postgres from "postgres"
 
-// Conexión a la base de datos de waitlist dentro del contenedor
+/**
+ * Conexión a la base de datos PostgreSQL para el microservicio de Lista de Espera.
+ *
+ * Utiliza la librería `postgres` (postgres.js) con un pool de conexiones.
+ * La URL de conexión se toma de `DATABASE_URL` o usa el valor por defecto
+ * para conexión local al puerto 5433.
+ *
+ * Configuración del pool:
+ * - `max: 10` — máximo 10 conexiones simultáneas
+ * - `idle_timeout: 20` — conexiones inactivas se cierran a los 20 segundos
+ * - `connect_timeout: 10` — timeout de conexión de 10 segundos
+ */
 const connectionString = process.env.DATABASE_URL || "postgres://root:rootpassword@localhost:5433/waitlist_db";
 
-// Configuración del Pool
 export const sql = postgres(connectionString, {
-    max: 10, // Define cuantas peticiones máximas puede abrir el microservicio
-    idle_timeout: 20, // Define un tiempo de inactividad de 20 segundos que, al pasar, se destruye automáticamente
-    connect_timeout: 10, // Define el tiempo que puede tardar en conectarse a la base de datos. De pasar el tiempo, la petición muere
+    max: 10,
+    idle_timeout: 20,
+    connect_timeout: 10,
 });
 
 console.log("Conexión a base de datos inicializada");

@@ -7,29 +7,47 @@ import {
 } from "../models/waitlist";
 import { AppError } from "../lib/app-error";
 
+/**
+ * Servicio de gestión de la lista de espera hospitalaria.
+ *
+ * Contiene la lógica de negocio para agregar pacientes, consultar
+ * la cola y actualizar estados. Publica eventos a RabbitMQ cada
+ * vez que se produce un cambio de estado para notificaciones.
+ */
 export class WaitlistService {
-  // Añade un nuevo paciente a la lista de espera
+  /**
+   * Agrega un nuevo paciente a la lista de espera.
+   *
+   * Flujo:
+   * 1. Valida que la prioridad esté entre 1 y 4
+   * 2. Valida que el motivo tenga al menos 5 caracteres
+   * 3. Valida que el userId esté presente
+   * 4. Crea la entrada con estado inicial `waiting`
+   * 5. Publica un evento `WAITLIST_STATUS_CHANGED` a RabbitMQ
+   *
+   * @param data - Datos de la entrada (userId, priority, reason)
+   * @returns La entrada creada con su ID y estado `waiting`
+   * @throws {AppError} Si la prioridad no está en rango 1-4 (400)
+   * @throws {AppError} Si el motivo tiene menos de 5 caracteres (400)
+   * @throws {AppError} Si falta el userId (400)
+   */
   async addPatientToWaitlist(
     data: Pick<WaitlistEntry, "userId" | "priority" | "reason">,
   ) {
-    // Verifica que la prioridad este dentro del rango existente
     if (data.priority < 1 || data.priority > 4) {
       throw new AppError("Nivel de prioridad inexistente");
     }
 
-    // Verifica que el campo del motivo de consulta no este vacío o contenga muy poca información
     if (!data.reason || data.reason.trim().length < 5) {
       throw new AppError(
         "El campo de motivo no puede estar vacio | contiene menos de 5 carácteres",
       );
     }
 
-    // Verifica que exista un userId y que el campo no este vacío
     if (!data.userId) {
       throw new AppError("El usuario debe estar asociado a un ID");
     }
 
-    // Si todos los datos son correctos, ingresa al nuevo usuario
     const newEntry: WaitlistEntry = {
       userId: data.userId,
       priority: data.priority,
@@ -57,30 +75,53 @@ export class WaitlistService {
     return result;
   }
 
-  // Obtiene la lista de todos los pacientes en la base de datos
+  /**
+   * Obtiene todas las entradas de la lista de espera.
+   *
+   * Retorna las entradas ordenadas por prioridad (urgente primero)
+   * y fecha de creación (más antigua primero).
+   *
+   * @returns Arreglo de entradas de la lista de espera
+   */
   async getQueue() {
-    return waitlistRepository.getPendingPatients(); // Usa la función del repositorio para obtener a todos los pacientes de la lista
+    return waitlistRepository.getPendingPatients();
   }
 
-  // Obtiene las entradas de la waitlist para un usuario específico
+  /**
+   * Obtiene las entradas de lista de espera de un usuario específico.
+   *
+   * @param userId - UUID del usuario cuyas entradas se desean consultar
+   * @returns Arreglo de entradas del usuario
+   */
   async getMyQueue(userId: string) {
     return waitlistRepository.findByUserId(userId);
   }
 
-  // Actualiza el estado del paciente en la lista de espera
+  /**
+   * Actualiza el estado de una entrada en la lista de espera.
+   *
+   * Flujo:
+   * 1. Valida que el nuevo estado sea uno de los permitidos
+   * 2. Actualiza el registro en la base de datos
+   * 3. Publica un evento `WAITLIST_STATUS_CHANGED` a RabbitMQ
+   *
+   * @param id - ID numérico de la entrada a actualizar
+   * @param newStatus - Nuevo estado deseado
+   * @returns La entrada actualizada con su nuevo estado
+   * @throws {AppError} Si el estado no es válido (400)
+   * @throws {AppError} Si la entrada no existe (404)
+   */
   async updateStatus(id: number, newStatus: WaitlistStatus) {
-    // Valida que el nuevo estado del paciente este dentro de los permitidos en el sistema
     if (!(VALID_STATUSES as readonly string[]).includes(newStatus)) {
       throw new AppError("El nuevo estado no es válido");
     }
-    // Guardamos el resultado en la base de datos
+
     const updatedEntry = await waitlistRepository.updateStatus(id, newStatus);
-    // Si updatedEntry es nulo o indefinido, el ID no existía
+
     if (!updatedEntry) {
       throw new AppError("Registro no encontrado en la lista de espera", 404);
     }
 
-    // Paquete que envía la información para la notificación
     const eventPayload = {
       userId: updatedEntry.user_id,
       type: "WAITLIST_STATUS_CHANGED",
@@ -89,14 +130,13 @@ export class WaitlistService {
       timestamp: new Date().toISOString(),
     };
 
-    // En caso de que tenga un error, lanza un error pero continúa la ejecución del sistema
     publishNotification(eventPayload).catch((err) => {
       console.error(
         "[!] Hubo un error al enviar notificación a RabbitQM:",
         err,
       );
     });
-    // Si todo salió bien, retornamos el resultado
+
     return updatedEntry;
   }
 }

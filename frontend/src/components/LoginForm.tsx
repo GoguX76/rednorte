@@ -2,6 +2,16 @@ import { useState } from 'preact/hooks';
 import { api } from '../lib/api';
 import { login } from '../stores/auth';
 
+/**
+ * Componente de formulario de inicio de sesión.
+ *
+ * Renderiza un formulario con campos de email y contraseña.
+ * Al enviar, llama al endpoint de login del API, almacena
+ * el token JWT en localStorage y redirige a `/waitlist`.
+ *
+ * Muestra errores de autenticación y un estado de carga
+ * mientras se procesa la solicitud.
+ */
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

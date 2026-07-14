@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'preact/hooks';
 import { api, type UserResponse } from '../lib/api';
 
+/**
+ * Componente que renderiza la tabla de usuarios registrados.
+ *
+ * Solo accesible para administradores. Muestra nombre, email,
+ * rol (Paciente/Médico/Admin) y ID truncado de cada usuario.
+ * Incluye estados de carga, error de autenticación y lista vacía.
+ */
 export default function UsersList() {
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);

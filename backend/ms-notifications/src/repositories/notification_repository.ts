@@ -1,42 +1,59 @@
 import { sql } from "../db/connection";
 import type { NotificationEntry } from "../models/notifications";
 
-// Constante que encapsula las funciones del repositorio de notificaciones
+/**
+ * Repositorio de acceso a datos para la tabla `notifications`.
+ *
+ * Gestiona las operaciones CRUD sobre las notificaciones usando
+ * tagged templates de postgres.js.
+ */
 export const notificationRepository = {
-    // Función que inserta una nueva notificación a la base de datos
-    async saveNotification(entry: NotificationEntry) {
-        // Inserta los datos a la base de datos de notificaiones
-        const result = await sql`
-            INSERT INTO notifications (user_id, type, message)
-            VALUES (${entry.userId}, ${entry.type}, ${entry.message})
-            RETURNING *;
-        `;
-        // Retorna el primer elemento del array
-        return result[0];
-    },
+  /**
+   * Inserta una nueva notificación en la base de datos.
+   *
+   * @param entry - Datos de la notificación (userId, type, message)
+   * @returns La notificación creada con su ID y timestamp generado por PostgreSQL
+   */
+  async saveNotification(entry: NotificationEntry) {
+    const result = await sql`
+      INSERT INTO notifications (user_id, type, message)
+      VALUES (${entry.userId}, ${entry.type}, ${entry.message})
+      RETURNING *;
+    `;
+    return result[0];
+  },
 
-    // Función que obtiene las notificaciones por el usuario
-    async getNotificationsByUser(userId: string) {
-        // Consulta que obtiene todas las notificaciones mediante el ID del usuario
-        const result = await sql`
-            SELECT * FROM notifications
-            WHERE user_id = ${userId}
-            ORDER BY created_at DESC;
-        `;
-        // Retorna el resultado
-        return result;
-    },
+  /**
+   * Obtiene todas las notificaciones de un usuario.
+   *
+   * Retorna las notificaciones ordenadas por fecha de creación
+   * descendente (más reciente primero).
+   *
+   * @param userId - UUID del usuario cuyas notificaciones se desean consultar
+   * @returns Arreglo de notificaciones del usuario
+   */
+  async getNotificationsByUser(userId: string) {
+    const result = await sql`
+      SELECT * FROM notifications
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC;
+    `;
+    return result;
+  },
 
-    // Función para marcar como leído en el frontend
-    async markAsRead(id: number) {
-        // Consulta que actualiza el estado de la notificación a leído
-        const result = await sql`
-            UPDATE notifications
-            SET is_read = true
-            WHERE id = ${id}
-            RETURNING *;
-        `;
-        // Retorna el primer elemento del array
-        return result[0];
-    }
+  /**
+   * Marca una notificación como leída.
+   *
+   * @param id - ID numérico de la notificación a marcar
+   * @returns La notificación actualizada o `undefined` si no se encontró
+   */
+  async markAsRead(id: number) {
+    const result = await sql`
+      UPDATE notifications
+      SET is_read = true
+      WHERE id = ${id}
+      RETURNING *;
+    `;
+    return result[0];
+  }
 }
