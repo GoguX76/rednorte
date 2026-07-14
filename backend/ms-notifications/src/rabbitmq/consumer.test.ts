@@ -30,7 +30,7 @@ mock.module("amqplib", () => ({
 // En lugar de mockear el servicio, se mockea el repositorio
 // Así el servicio real se ejecuta y podemos verificar que se llamó a la BD
 const mockSaveNotification = mock(() => Promise.resolve({ id: 1 }));
-import { notificationRepository } from "../repository/notification_repository";
+import { notificationRepository } from "../repositories/notification_repository";
 const originalSave = notificationRepository.saveNotification;
 notificationRepository.saveNotification = mockSaveNotification;
 

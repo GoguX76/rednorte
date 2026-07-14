@@ -1,5 +1,7 @@
 import { startConsumer } from "./rabbitmq/consumer";
 import { addConnection, removeConnection } from "./websocket/connectionManager";
+import { AppError } from "./lib/app-error";
+import { handleError } from "./lib/error-handler";
 
 const PORT = parseInt(Bun.env.PORT || "3002");
 
@@ -10,28 +12,32 @@ const server = Bun.serve<{ userId: string }>({
     port: PORT,
 
     fetch(req, server) {
-        const url = new URL(req.url);
+        try {
+            const url = new URL(req.url);
 
-        if (url.pathname === "/health") {
-            return Response.json({ status: "ok", service: "ms-notifications" });
-        }
-
-        if (url.pathname === "/ws") {
-            const userId = url.searchParams.get("userId");
-            
-            if(!userId) {
-                return new Response("Se requiere un userId", { status: 400 });
+            if (url.pathname === "/health") {
+                return Response.json({ status: "ok", service: "ms-notifications" });
             }
 
-            const success = server.upgrade(req, {
-                data: { userId }
-            });
+            if (url.pathname === "/ws") {
+                const userId = url.searchParams.get("userId");
 
-            if (success) return undefined;
-            return new Response("Fallo al conectar WebSocket", { status: 500 });
+                if(!userId) {
+                    throw new AppError("Se requiere un userId", 400);
+                }
+
+                const success = server.upgrade(req, {
+                    data: { userId }
+                });
+
+                if (success) return undefined;
+                throw new AppError("Fallo al conectar WebSocket", 500);
+            }
+
+            throw new AppError("Ruta no encontrada", 404);
+        } catch (err) {
+            return handleError(err as Error);
         }
-
-        return new Response("Not found", { status: 400 });
     },
 
     websocket: {

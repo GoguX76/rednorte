@@ -1,5 +1,5 @@
 import { describe, it, expect, mock, beforeAll, beforeEach, afterAll } from "bun:test";
-import { notificationRepository } from "../repository/notification_repository";
+import { notificationRepository } from "../repositories/notification_repository";
 import { activeConnections } from "../websocket/connectionManager";
 import { notificationService } from "./notification_service";
 
