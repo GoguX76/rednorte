@@ -4,12 +4,24 @@ import { $user, logout, initAuth } from '../stores/auth';
 import NotificationBell from './NotificationBell';
 import { useNotifications } from '../hooks/useNotifications';
 
+/** Elementos de navegación del sidebar. */
 const NAV_ITEMS = [
   { href: '/', label: 'Inicio', icon: '🏠' },
   { href: '/about', label: 'Quiénes Somos', icon: 'ℹ️' },
   { href: '/waitlist', label: 'Lista de Espera', icon: '📋' },
 ];
 
+/**
+ * Componente de barra lateral de navegación.
+ *
+ * Características:
+ * - Se desplaza desde la izquierda con animación CSS (toggle via hamburger)
+ * - Incluye backdrop oscuro al abrir en móvil
+ * - Muestra botones de autenticación (login/register) o perfil + logout
+ * - Inicializa la sesión desde localStorage al montar
+ * - Activa el hook de notificaciones WebSocket para el usuario autenticado
+ * - Incluye el componente NotificationBell junto al botón de cerrar
+ */
 export default function Sidebar() {
   const user = useStore($user);
   const [isOpen, setIsOpen] = useState(false);

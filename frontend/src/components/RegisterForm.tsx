@@ -1,6 +1,13 @@
 import { useState } from 'preact/hooks';
 import { api } from '../lib/api';
 
+/**
+ * Componente de formulario de registro de usuarios.
+ *
+ * Renderiza un formulario con campos de nombre, apellido, email y contraseña.
+ * Al enviar, llama al endpoint de registro del API y muestra un mensaje
+ * de éxito o error. Los campos se limpian después de un registro exitoso.
+ */
 export default function RegisterForm() {
   const [first_name, setFirstName] = useState('');
   const [last_name, setLastName] = useState('');

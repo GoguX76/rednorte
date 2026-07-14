@@ -2,10 +2,21 @@ import { useState, useRef, useEffect } from 'preact/hooks';
 import { useStore } from '@nanostores/preact';
 import { $notifications, $unreadCount, markAsRead } from '../stores/notifications';
 
+/** Mapa de tipos de notificación a iconos emoji. */
 const TYPE_ICONS: Record<string, string> = {
   WAITLIST_STATUS_CHANGED: '🔄',
 };
 
+/**
+ * Componente de campana de notificaciones con dropdown.
+ *
+ * Muestra un icono de campana con badge del contador de no leídas.
+ * Al hacer click, despliega un panel con la lista de notificaciones
+ * ordenadas por fecha (más reciente primero). Cada notificación se
+ * marca como leída al hacer click sobre ella.
+ *
+ * Cierra el dropdown automáticamente al hacer click fuera del componente.
+ */
 export default function NotificationBell() {
   const [open, setOpen] = useState(false);
   const notifications = useStore($notifications);

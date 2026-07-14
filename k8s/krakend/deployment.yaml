@@ -22,6 +22,12 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /etc/krakend
+          readinessProbe:
+            httpGet:
+              path: /__health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
           livenessProbe:
             httpGet:
               path: /__health

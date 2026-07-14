@@ -2,7 +2,7 @@
  * Error personalizado para errores controlados en la aplicación.
  *
  * Se usa en servicios y repositories para lanzar errores con un
- * código HTTP específico. El {@link errorHandler} los captura y
+ * código HTTP específico. El {@link handleError} los captura y
  * retorna la respuesta JSON correspondiente.
  */
 export class AppError extends Error {

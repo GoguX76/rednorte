@@ -1,8 +1,16 @@
 import { useEffect, useRef } from 'preact/hooks';
 import { addNotification, type Notification } from '../stores/notifications';
 
+/** URL del WebSocket server para notificaciones en tiempo real. */
 const WS_URL = import.meta.env.PUBLIC_WS_URL || 'ws://localhost:3002/ws';
 
+/**
+ * Reproduce un sonido breve de notificación usando la Web Audio API.
+ *
+ * Genera un tono sinusoidal que desciende de 800Hz a 400Hz durante
+ * 0.3 segundos con fade-out gradual. Se ejecuta de forma síncrona
+ * cuando llega un mensaje por WebSocket.
+ */
 function playDropSound() {
   try {
     const ctx = new AudioContext();
@@ -21,6 +29,19 @@ function playDropSound() {
   }
 }
 
+/**
+ * Hook personalizado que gestiona la conexión WebSocket para
+ * recibir notificaciones en tiempo real.
+ *
+ * Características:
+ * - Se conecta automáticamente cuando `userId` no es null
+ * - Implementa reconexión con backoff exponencial (2s → 15s máximo)
+ * - Al recibir un mensaje, lo agrega al store de notificaciones
+ * - Reproduce un sonido de notificación al recibir cada mensaje
+ * - Se desconecta limpiamente al desmontar el componente o cambiar userId
+ *
+ * @param userId - UUID del usuario autenticado o `null` si no hay sesión
+ */
 export function useNotifications(userId: string | null) {
   const wsRef = useRef<WebSocket | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

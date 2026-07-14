@@ -1,8 +1,26 @@
 import { startConsumer } from "./rabbitmq/consumer";
 import { addConnection, removeConnection } from "./websocket/connectionManager";
+import { AppError } from "./lib/app-error";
+import { handleError } from "./lib/error-handler";
 
+/** Puerto del servidor HTTP y WebSocket (por defecto 3002). */
 const PORT = parseInt(Bun.env.PORT || "3002");
 
+/**
+ * Punto de entrada del microservicio de Notificaciones (ms-notifications).
+ *
+ * Este servicio opera de forma diferente a los demás:
+ * - **No usa Hono**, sino `Bun.serve()` directamente para soporte nativo de WebSockets
+ * - Inicia el consumer de RabbitMQ al arrancar (escucha la cola `notifications_queue`)
+ * - Expone un endpoint `/health` para verificación de salud
+ * - Expone un endpoint WebSocket `/ws` que acepta `?userId=UUID`
+ *
+ * Flujo WebSocket:
+ * 1. El cliente se conecta a `ws://localhost:3002/ws?userId=UUID`
+ * 2. Se registra la conexión en el `connectionManager`
+ * 3. Cuando llega un mensaje desde RabbitMQ, se notifica al usuario en tiempo real
+ * 4. Al desconectarse, se remueve la conexión del mapa
+ */
 console.log("[*] Inicializando servicios de ms-notifications");
 await startConsumer();
 
@@ -10,28 +28,32 @@ const server = Bun.serve<{ userId: string }>({
     port: PORT,
 
     fetch(req, server) {
-        const url = new URL(req.url);
+        try {
+            const url = new URL(req.url);
 
-        if (url.pathname === "/health") {
-            return Response.json({ status: "ok", service: "ms-notifications" });
-        }
-
-        if (url.pathname === "/ws") {
-            const userId = url.searchParams.get("userId");
-            
-            if(!userId) {
-                return new Response("Se requiere un userId", { status: 400 });
+            if (url.pathname === "/health") {
+                return Response.json({ status: "ok", service: "ms-notifications" });
             }
 
-            const success = server.upgrade(req, {
-                data: { userId }
-            });
+            if (url.pathname === "/ws") {
+                const userId = url.searchParams.get("userId");
 
-            if (success) return undefined;
-            return new Response("Fallo al conectar WebSocket", { status: 500 });
+                if(!userId) {
+                    throw new AppError("Se requiere un userId", 400);
+                }
+
+                const success = server.upgrade(req, {
+                    data: { userId }
+                });
+
+                if (success) return undefined;
+                throw new AppError("Fallo al conectar WebSocket", 500);
+            }
+
+            throw new AppError("Ruta no encontrada", 404);
+        } catch (err) {
+            return handleError(err as Error);
         }
-
-        return new Response("Not found", { status: 400 });
     },
 
     websocket: {
