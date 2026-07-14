@@ -1,14 +1,31 @@
-// Creamos una interfaz para definir los atributos que tendrá el usuario en el sistema
+/**
+ * Representación de un usuario en el sistema hospitalario.
+ *
+ * Se almacena en la tabla `users` de PostgreSQL y se usa a través
+ * de todo el microservicio de usuarios para autenticación y gestión.
+ *
+ * @property id - UUID generado automáticamente por PostgreSQL
+ * @property email - Correo electrónico único (usado como identificador de login)
+ * @property first_name - Nombre del usuario
+ * @property last_name - Apellido del usuario
+ * @property password - Contraseña hasheada con Argon2 (nunca se retorna en respuestas)
+ * @property phone - Número de teléfono (opcional)
+ * @property role_id - UUID del rol asignado en la tabla `roles`
+ * @property is_active - Indica si el usuario puede autenticarse (soft delete)
+ * @property is_verified - Indica si el email fue verificado
+ * @property created_at - Timestamp de creación de la cuenta
+ * @property updated_at - Timestamp de la última actualización de datos
+ */
 export interface UserEntry {
-    id?: string; // Al Postgre asignar la ID, lo ponemos como opcional
-    email: string; // Email del usuario
-    first_name: string; // Primer nombre del usuario
-    last_name: string // Apellido del usuario
-    password: string; // Contraseña del usuario
-    phone?: string; // Teléfono del usuario (Opcional)
-    role_id?: string // Rol del usuario en el sistema
-    is_active?: boolean; // Define si el usuario está activo en el sistema o no
-    is_verified?: boolean; // Verifica que el usuario está verificado en el sistema
-    created_at?: Date; // Fecha en la que se crea la cuenta
-    updated_at?: Date; // Fecha en la que se actualizan los datos de la cuenta
+    id?: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    password: string;
+    phone?: string;
+    role_id?: string;
+    is_active?: boolean;
+    is_verified?: boolean;
+    created_at?: Date;
+    updated_at?: Date;
 }

@@ -3,8 +3,24 @@ import { addConnection, removeConnection } from "./websocket/connectionManager";
 import { AppError } from "./lib/app-error";
 import { handleError } from "./lib/error-handler";
 
+/** Puerto del servidor HTTP y WebSocket (por defecto 3002). */
 const PORT = parseInt(Bun.env.PORT || "3002");
 
+/**
+ * Punto de entrada del microservicio de Notificaciones (ms-notifications).
+ *
+ * Este servicio opera de forma diferente a los demás:
+ * - **No usa Hono**, sino `Bun.serve()` directamente para soporte nativo de WebSockets
+ * - Inicia el consumer de RabbitMQ al arrancar (escucha la cola `notifications_queue`)
+ * - Expone un endpoint `/health` para verificación de salud
+ * - Expone un endpoint WebSocket `/ws` que acepta `?userId=UUID`
+ *
+ * Flujo WebSocket:
+ * 1. El cliente se conecta a `ws://localhost:3002/ws?userId=UUID`
+ * 2. Se registra la conexión en el `connectionManager`
+ * 3. Cuando llega un mensaje desde RabbitMQ, se notifica al usuario en tiempo real
+ * 4. Al desconectarse, se remueve la conexión del mapa
+ */
 console.log("[*] Inicializando servicios de ms-notifications");
 await startConsumer();
 

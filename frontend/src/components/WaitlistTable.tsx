@@ -3,6 +3,7 @@ import { useStore } from '@nanostores/preact';
 import { $user } from '../stores/auth';
 import { api, ApiError, type WaitlistEntry } from '../lib/api';
 
+/** Mapa de prioridad numérica a etiqueta legible. */
 const PRIORITY_LABELS: Record<number, string> = {
   1: 'Baja',
   2: 'Media',
@@ -10,6 +11,7 @@ const PRIORITY_LABELS: Record<number, string> = {
   4: 'Urgencia',
 };
 
+/** Mapa de prioridad numérica a clases de color de Tailwind. */
 const PRIORITY_COLORS: Record<number, string> = {
   1: 'bg-green-100 text-green-800',
   2: 'bg-yellow-100 text-yellow-800',
@@ -17,6 +19,7 @@ const PRIORITY_COLORS: Record<number, string> = {
   4: 'bg-red-100 text-red-800',
 };
 
+/** Mapa de estado a etiqueta legible en español. */
 const STATUS_LABELS: Record<string, string> = {
   waiting: 'En Espera',
   attending: 'En Atención',
@@ -24,6 +27,7 @@ const STATUS_LABELS: Record<string, string> = {
   cancelled: 'Cancelado',
 };
 
+/** Mapa de estado a clases de color de Tailwind. */
 const STATUS_COLORS: Record<string, string> = {
   waiting: 'bg-blue-100 text-blue-800',
   attending: 'bg-purple-100 text-purple-800',
@@ -31,6 +35,16 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: 'bg-red-100 text-red-800',
 };
 
+/**
+ * Componente que renderiza la tabla de la lista de espera.
+ *
+ * Comportamiento según el rol del usuario:
+ * - **Paciente** (`rol_patient`): ve solo sus propias entradas (usa `getMyQueue`)
+ * - **Admin/Médico**: ven todas las entradas en espera (usa `getQueue`)
+ *
+ * Muestra estados de carga, errores de autenticación con link a login,
+ * y una tabla con ID, usuario, prioridad, estado, motivo y fecha.
+ */
 export default function WaitlistTable() {
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
