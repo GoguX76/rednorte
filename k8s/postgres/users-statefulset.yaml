@@ -35,6 +35,16 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - root
+                - -d
+                - users_db
+            initialDelaySeconds: 5
+            periodSeconds: 3
           livenessProbe:
             exec:
               command:
