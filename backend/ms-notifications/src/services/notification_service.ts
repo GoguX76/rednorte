@@ -1,4 +1,4 @@
-import { notificationRepository } from "../repository/notification_repository";
+import { notificationRepository } from "../repositories/notification_repository";
 import { notifyUserIfOnline } from "../websocket/connectionManager";
 import type { EventPayload, NotificationEntry } from "../models/notifications";
 
