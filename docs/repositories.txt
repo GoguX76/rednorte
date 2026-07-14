@@ -17,6 +17,8 @@ rednorte/                            # Repositorio Principal
 │   ├── ms-users/                    # Microservicio de Usuarios
 │   ├── ms-waitlist/                 # Microservicio de Lista de Espera
 │   └── ms-notifications/            # Microservicio de Notificaciones
+├── k8s/                             # Manifiestos Kubernetes (Kustomize)
+├── scripts/                         # Scripts de despliegue automatizado
 ├── docs/                            # Documentación y diagramas
 ├── docker-compose.yml               # Orquestación de contenedores
 └── README.md                        # Documentación principal
@@ -26,8 +28,8 @@ Descripción de cada componente:
 
 Repositorio Principal
   Ruta: https://github.com/GoguX76/rednorte
-  Contiene la documentación general, docker-compose, guías del proyecto
-  y la organización completa del monorepo.
+  Contiene la documentación general, docker-compose, scripts de despliegue,
+  manifiestos de Kubernetes y la organización completa del monorepo.
 
 Repositorio Frontend
   Ruta: https://github.com/GoguX76/rednorte/tree/main/frontend
